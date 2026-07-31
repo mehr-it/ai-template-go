@@ -1,0 +1,43 @@
+> **When to read this**: You're an AI agent that just opened this repo. Read this file first.
+
+# __PROJECT_NAME__
+
+Module: `__PROJECT_MODULE__`.
+
+## Dev environment
+
+The outer container is the long-lived sysbox container where all dev work happens. Start it and get a shell:
+
+```bash
+cd docker
+docker compose up -d
+docker exec -it __project_prefix__-dev bash
+```
+
+OpenCode and Claude Code are preinstalled inside the container. Run your agent from there.
+
+## Parallel worktrees for test isolation
+
+Integration tests need isolated services. Each agent works in its own git worktree under `.worktrees/<name>/` and brings up a private inner stack there. See `docker_inner/AGENTS.md` for the full picture.
+
+The pattern for running tests in a worktree:
+
+```bash
+cd .worktrees/<name>/
+make dev-up
+TEST_ENV_FILE=$PWD/.env.testing go test -race ./...
+make dev-down
+```
+
+`make dev-up` from the **main checkout** exits 64 by design. The inner stack is for worktrees only. If you see exit code 64, you're in the wrong directory.
+
+## Layout
+
+- `docker/` — outer container definition (sysbox-runc, long-lived)
+- `docker_inner/` — per-worktree inner stack (compose files, lifecycle scripts)
+- `cmd/__project_prefix__/` — main binary entrypoint (if skeleton was generated)
+- `bootstrap/` — bootstrap scripts and interview protocol, kept as reference (KEEP_BOOTSTRAP=yes default); add more services later via `bootstrap/services/README.md`
+
+## Bootstrap history
+
+Bootstrapped from `mehr-it/ai-template`. Template updates are cherry-picked manually. No re-bootstrap.

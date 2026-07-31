@@ -273,7 +273,7 @@ sed -i "/# BOOTSTRAP_SUMMARY_LINES/a\\  echo \"[docker_inner] ${svc}  127.0.0.1:
 ```bash
 SVC_UPPER="$(echo "${svc}" | tr '[:lower:]' '[:upper:]')"
 sed -i "/# BOOTSTRAP_STATUS_ROWS/a\\
-${SVC_UPPER}_PORT=\"\$(docker compose -p \"wasi-\${__PROJECT_PREFIX___STACK_SLUG}\" -f docker_inner/docker-compose.yml port ${svc} 5432 2>/dev/null | cut -d: -f2)\"\\
+${SVC_UPPER}_PORT=\"\$(docker compose -p \"__project_prefix__-\${__PROJECT_PREFIX___STACK_SLUG}\" -f docker_inner/docker-compose.yml port ${svc} 5432 2>/dev/null | cut -d: -f2)\"\\
 printf \"%-20s %s\\\\n\" \"${svc}\" \"127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
   docker_inner/status.sh
 ```

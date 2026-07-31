@@ -25,7 +25,7 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
   # Bring stack up (--wait blocks until all healthchecks green).
   # Timeout accommodates slow-starting services (JVM cold starts, DB init, etc.).
   docker compose \
-    -p "wasi-${__PROJECT_PREFIX___STACK_SLUG}" \
+    -p "__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}" \
     -f "${__PROJECT_PREFIX___WORKTREE_ROOT}/docker_inner/docker-compose.yml" \
     up -d --wait --wait-timeout 180
 
@@ -34,7 +34,7 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
     local svc="$1" port="$2" result
     for _ in $(seq 1 20); do
       result="$(docker compose \
-        -p "wasi-${__PROJECT_PREFIX___STACK_SLUG}" \
+        -p "__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}" \
         -f "${__PROJECT_PREFIX___WORKTREE_ROOT}/docker_inner/docker-compose.yml" \
         port "${svc}" "${port}" 2>/dev/null | cut -d: -f2)"
       if [[ -n "${result}" ]]; then
@@ -69,7 +69,7 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
   mv "${TMPFILE}" "${ENV_FILE}"
   echo "[docker_inner] wrote ${ENV_FILE}"
 
-  echo "[docker_inner] stack 'wasi-${__PROJECT_PREFIX___STACK_SLUG}' is up."
+  echo "[docker_inner] stack '__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}' is up."
   # BOOTSTRAP_SUMMARY_LINES — service summary lines appended by bootstrap
   echo "[docker_inner] env file: ${ENV_FILE}  (NEVER COMMIT — generated artifact)"
   echo "[docker_inner] run tests with: TEST_ENV_FILE=${ENV_FILE} go test ..."

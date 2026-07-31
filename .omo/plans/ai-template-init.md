@@ -156,7 +156,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
      WAVE 1 — Preflight + docker/ fixes (7 todos: 1-7)
      ========================================================================= -->
 
-- [ ] 1. `.omo/evidence/task-1-baseline.txt`: Capture pre-change repo snapshot for audit trail — expect diffable file with tree + selected file contents + before-grep
+- [x] 1. `.omo/evidence/task-1-baseline.txt`: Capture pre-change repo snapshot for audit trail — expect diffable file with tree + selected file contents + before-grep
   What to do / Must NOT do: Run `ls -laR .` on repo root (excluding `.git/`, `.omo/`, `.idea/`, `.codegraph/`); concat `docker/Dockerfile`, `docker/docker-compose.yml`, `docker/entyrpoint.sh`; run `grep -RnE 'WASI_|wasi_|signal-cli|whatsmeow|wasi-bridge|entyrpoint' . --exclude-dir=.git --exclude-dir=.omo`; write everything to `.omo/evidence/task-1-baseline.txt`. MUST NOT edit any repo file.
   Parallelization: Wave 1 | Blocked by: none | Blocks: none
   References: `docker/*`, `example/docker_inner/*`, `opencode.jsonc`
@@ -164,7 +164,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `wc -l .omo/evidence/task-1-baseline.txt` returns >100 lines; failure = if file missing/empty, re-run. Evidence `.omo/evidence/task-1-baseline.txt`
   Commit: N (evidence-only)
 
-- [ ] 2. `docker/entyrpoint.sh` → `docker/entrypoint.sh`: Rename to match Dockerfile COPY line 71 — expect Dockerfile COPY reference resolves
+- [x] 2. `docker/entyrpoint.sh` → `docker/entrypoint.sh`: Rename to match Dockerfile COPY line 71 — expect Dockerfile COPY reference resolves
   What to do / Must NOT do: `git mv docker/entyrpoint.sh docker/entrypoint.sh` (or `mv` + `git add -A`). Content unchanged. MUST NOT edit Dockerfile (which already says `entrypoint.sh`). MUST NOT touch permissions (was 775 via COPY --chmod).
   Parallelization: Wave 1 | Blocked by: none | Blocks: 32
   References: `docker/entyrpoint.sh:1-39` (file), `docker/Dockerfile:71` (already correct)
@@ -172,7 +172,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = **static check** `grep -q 'COPY.*entrypoint.sh' docker/Dockerfile && test -f docker/entrypoint.sh` (Dockerfile source and target file both exist as expected; a full `docker build` requires network for apt/npm/curl-based RUN steps and a running docker daemon — out of scope for this task's QA); failure = if both files or neither exist, git restore + re-run. Evidence `.omo/evidence/task-2-rename.txt` (git status output + static check result)
   Commit: Y | `fix(docker): rename entyrpoint.sh → entrypoint.sh (typo)`
 
-- [ ] 3. `docker/Dockerfile:13-15`: Delete dead `op` user creation block — expect no unused user, `USER ubuntu` still active
+- [x] 3. `docker/Dockerfile:13-15`: Delete dead `op` user creation block — expect no unused user, `USER ubuntu` still active
   What to do / Must NOT do: Remove lines 13-15 (the `RUN useradd -m -s /bin/bash op && echo "op ALL=..." && chmod 0440 ...` block). MUST NOT touch line 32-33 (ubuntu-group sudoers — that IS used) or line 35 (`USER ubuntu`).
   Parallelization: Wave 1 | Blocked by: none | Blocks: none
   References: `docker/Dockerfile:13-15` (block to delete), `docker/Dockerfile:31-35` (keep intact)
@@ -180,7 +180,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `docker build -t ai-template-test docker/ 2>&1 | tail -20` reaches USER ubuntu without complaint; failure = if `op` referenced anywhere else (verified by inspection: it is not), revert. Evidence `.omo/evidence/task-3-dockerfile-diff.txt` (diff output)
   Commit: Y | `chore(docker): remove unused op user block from Dockerfile`
 
-- [ ] 4. `docker/docker-compose.yml:4` + new `env_file: .env`: Add `${PROJECT_NAME:-ai-template}` fallback and explicit env_file — expect `docker compose config` renders without a `.env` file
+- [x] 4. `docker/docker-compose.yml:4` + new `env_file: .env`: Add `${PROJECT_NAME:-ai-template}` fallback and explicit env_file — expect `docker compose config` renders without a `.env` file
   What to do / Must NOT do: Change `container_name: ${PROJECT_NAME}-dev` to `container_name: ${PROJECT_NAME:-ai-template}-dev`. Add `env_file:` block under `workspace:` immediately before `environment:` with one entry `- .env` — but only load if it exists (compose treats missing env_file as fatal, so wrap: use `env_file: - path: .env\n      required: false` — Compose Spec v3.9+ supports this; if fails, fall back to relying on implicit `.env` auto-load and omit the explicit block). MUST NOT change sysbox-runc runtime, volumes, memory limit, network.
   Parallelization: Wave 1 | Blocked by: none | Blocks: 7
   References: `docker/docker-compose.yml:1-31`
@@ -188,7 +188,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = both with-`.env` and without-`.env` render successfully; failure = if `env_file` block with `required: false` unsupported by installed compose version, fall back to implicit-only. Evidence `.omo/evidence/task-4-compose-diff.txt`
   Commit: Y | `fix(docker): add PROJECT_NAME fallback and explicit env_file to compose`
 
-- [ ] 5. `docker/.env.example`: Create owner-copyable env template with PROJECT_NAME/UID/GID defaults + inline docs — expect `cp .env.example .env` gives a working env
+- [x] 5. `docker/.env.example`: Create owner-copyable env template with PROJECT_NAME/UID/GID defaults + inline docs — expect `cp .env.example .env` gives a working env
   What to do / Must NOT do: Write `docker/.env.example` with header comment, `PROJECT_NAME=ai-template` (bootstrap rewrites), `UID=1000`, `GID=1000`, each with a one-line explanation. MUST NOT include secrets, real service credentials, or opencode config paths.
   Parallelization: Wave 1 | Blocked by: none | Blocks: 7
   References: `docker/docker-compose.yml:6-10` (uses PROJECT_NAME, UID, GID)
@@ -196,7 +196,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `cp docker/.env.example docker/.env && docker compose -f docker/docker-compose.yml config >/dev/null && rm docker/.env`; failure = if malformed KEY=VALUE, compose errors. Evidence `.omo/evidence/task-5-env-example.txt` (file contents)
   Commit: Y | `feat(docker): add .env.example with PROJECT_NAME/UID/GID defaults`
 
-- [ ] 6. `docker/opencode/config/.gitkeep`: Create directory placeholder for compose bind-mount source — expect mount `./opencode/config/` no longer errors
+- [x] 6. `docker/opencode/config/.gitkeep`: Create directory placeholder for compose bind-mount source — expect mount `./opencode/config/` no longer errors
   What to do / Must NOT do: `mkdir -p docker/opencode/config && touch docker/opencode/config/.gitkeep`. MUST NOT put any real opencode config here (it's a placeholder mount source; owner populates later).
   Parallelization: Wave 1 | Blocked by: none | Blocks: none
   References: `docker/docker-compose.yml:12` (mounts `./opencode/config/`)
@@ -204,7 +204,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `docker compose -f docker/docker-compose.yml config` no longer warns about missing bind source; failure = if `.gitkeep` accidentally non-empty, `truncate -s 0`. Evidence `.omo/evidence/task-6-gitkeep.txt` (ls output)
   Commit: Y | `fix(docker): create docker/opencode/config/ mount source placeholder`
 
-- [ ] 7. `.omo/evidence/task-7-outer-compose*.txt`: Verify `docker compose config` on outer twice (with/without `.env`) — expect both exit 0
+- [x] 7. `.omo/evidence/task-7-outer-compose*.txt`: Verify `docker compose config` on outer twice (with/without `.env`) — expect both exit 0
   What to do / Must NOT do: `docker compose -f docker/docker-compose.yml config > .omo/evidence/task-7-outer-compose-no-env.txt 2>&1` (no .env present). Then `cp docker/.env.example docker/.env && docker compose -f docker/docker-compose.yml config > .omo/evidence/task-7-outer-compose-with-env.txt 2>&1; rm docker/.env`. MUST clean up test `.env` file — must NOT leave it on disk.
   Parallelization: Wave 1 | Blocked by: 4, 5 | Blocks: none
   References: `docker/docker-compose.yml`, `docker/.env.example`
@@ -216,7 +216,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
      WAVE 2 — docker_inner/ generic template (8 todos: 8-15)
      ========================================================================= -->
 
-- [ ] 8. `docker_inner/`: Copy `example/docker_inner/*` (preserving hidden files, lib/) — expect working seed for template rewrite; **abort if `docker_inner/` already exists and is non-empty**
+- [x] 8. `docker_inner/`: Copy `example/docker_inner/*` (preserving hidden files, lib/) — expect working seed for template rewrite; **abort if `docker_inner/` already exists and is non-empty**
   What to do / Must NOT do: **Preflight:** `if test -d docker_inner && [ -n "$(ls -A docker_inner 2>/dev/null)" ]; then echo "docker_inner/ already exists and is non-empty — aborting to avoid silent overwrite. Delete it manually if intentional." >&2; exit 1; fi`. Then `cp -a example/docker_inner/ docker_inner/` — preserves `.gitignore`, `lib/slug.sh`, all files, permissions, no dereferencing (no symlinks in source, `-a` is safe). MUST NOT delete `example/` yet (that's task 30, after tasks 22-24 also consume from example/). MUST NOT modify content during copy. MUST NOT silently overwrite an existing non-empty `docker_inner/` (that would clobber Wave 2 partial work on a re-run).
   Parallelization: Wave 2 | Blocked by: none | Blocks: 9, 10, 11, 12, 13, 14
   References: `example/docker_inner/*` (source: `AGENTS.md`, `docker-compose.yml`, `.env.testing.template`, `.gitignore`, `down.sh`, `lib/slug.sh`, `postgres.yml`, `prune.sh`, `reset.sh`, `signal-cli.yml`, `status.sh`, `up.sh`)
@@ -224,7 +224,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = 12 entries in `docker_inner/` matching source; failure = if `diff -r` shows any output, re-copy from clean state; if preflight abort fires, the executor knows to intervene before proceeding. Evidence `.omo/evidence/task-8-copy-diff.txt`
   Commit: Y | `chore(docker_inner): seed template from example/`
 
-- [ ] 9. `docker_inner/lib/slug.sh`: Case-preserving sed replace WASI_→__PROJECT_PREFIX___ and wasi_→__project_prefix___ — expect greppable placeholders, `bash -n` passes, default `/home/ubuntu/workspace` preserved
+- [x] 9. `docker_inner/lib/slug.sh`: Case-preserving sed replace WASI_→__PROJECT_PREFIX___ and wasi_→__project_prefix___ — expect greppable placeholders, `bash -n` passes, default `/home/ubuntu/workspace` preserved
   What to do / Must NOT do: Run `sed -i 's/WASI_/__PROJECT_PREFIX___/g; s/wasi_/__project_prefix___/g' docker_inner/lib/slug.sh`. Verify `/home/ubuntu/workspace` is unchanged (matches outer container mount target). MUST NOT change `set -euo pipefail`, shebang, sanitize regex, sha1sum uniqueness logic, or the `export` keyword usage.
   Parallelization: Wave 2 | Blocked by: 8 | Blocks: 15, 19, 20
   References: `docker_inner/lib/slug.sh:1-50` (from task 8 copy)
@@ -232,7 +232,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `bash -n` exits 0; the triple-underscore function names (`__project_prefix___resolve_worktree_root`) parse as valid bash function names — verify by defining `__project_prefix___test() { :; }` in a subshell. Failure = if any WASI_/wasi_ survives, sed missed → re-run. Evidence `.omo/evidence/task-9-slug-diff.txt`
   Commit: Y | `feat(docker_inner): rewrite slug.sh with __PROJECT_PREFIX__ placeholders`
 
-- [ ] 10. `docker_inner/{up,down,reset,status,prune}.sh`: Case-preserving placeholder rewrite + insert THREE distinct markers (`# BOOTSTRAP_SERVICE_PORTS`, `# BOOTSTRAP_SUMMARY_LINES`, `# BOOTSTRAP_STATUS_ROWS`) + strip signal-cli/postgres-specific port-discovery + rewrite `wasi-` (hyphen) in prune.sh — expect empty-service scripts with injection markers, `bash -n` all pass
+- [x] 10. `docker_inner/{up,down,reset,status,prune}.sh`: Case-preserving placeholder rewrite + insert THREE distinct markers (`# BOOTSTRAP_SERVICE_PORTS`, `# BOOTSTRAP_SUMMARY_LINES`, `# BOOTSTRAP_STATUS_ROWS`) + strip signal-cli/postgres-specific port-discovery + rewrite `wasi-` (hyphen) in prune.sh — expect empty-service scripts with injection markers, `bash -n` all pass
   What to do / Must NOT do: For each of `up.sh`, `down.sh`, `reset.sh`, `status.sh`, `prune.sh`:
     (a) `sed -i 's/WASI_/__PROJECT_PREFIX___/g; s/wasi_/__project_prefix___/g' <file>` — note this handles UNDERSCORE forms only.
     (b) In `up.sh`: replace lines 50-51 (`SIGNAL_HTTP_PORT="..."` and `POSTGRES_PORT="..."`) plus the two sed stanzas at lines 65-66 with a single marker line `  # BOOTSTRAP_SERVICE_PORTS — port-discovery + sed stanzas appended by bootstrap when services are selected`; keep the `_get_port` helper function (lines 33-48) intact — that's the reusable primitive.
@@ -247,7 +247,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = every script parses; each of the three marker names appears exactly once in its target file; `prune.sh` contains `startswith("__project_prefix__-")` and NOT `startswith("wasi-")`; failure = if `grep -c` returns 0 (missed) or >1 (duplicated), adjust the sed target. If `wasi-` (hyphen) survives in prune.sh, step (e)'s explicit sed was skipped — re-run. Evidence `.omo/evidence/task-10-scripts-diff.txt` (per-file diff)
   Commit: Y | `feat(docker_inner): rewrite lifecycle scripts with placeholders and service-injection markers`
 
-- [ ] 11. `docker_inner/docker-compose.yml`: Rewrite with placeholder project name + empty `include:` + `# BOOTSTRAP_SERVICE_INCLUDES` marker + 3-step add-a-service recipe comment — expect empty-service compose file that renders with a sample prefix
+- [x] 11. `docker_inner/docker-compose.yml`: Rewrite with placeholder project name + empty `include:` + `# BOOTSTRAP_SERVICE_INCLUDES` marker + 3-step add-a-service recipe comment — expect empty-service compose file that renders with a sample prefix
   What to do / Must NOT do: Overwrite `docker_inner/docker-compose.yml` (currently 7 lines) with:
   ```
   # Assembled by docker_inner/up.sh — do not invoke directly.
@@ -268,7 +268,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = compose config renders with a fake env var and no services; failure = if `include: []` unsupported, fall back to omitting the `include:` key and adding `services: {}` — re-verify. Evidence `.omo/evidence/task-11-compose-config.txt`
   Commit: Y | `feat(docker_inner): make compose file service-empty with BOOTSTRAP_SERVICE_INCLUDES marker`
 
-- [ ] 12. `docker_inner/signal-cli.yml`, `docker_inner/postgres.yml`: Delete both project-specific service files — expect only `docker-compose.yml` remains as a .yml file in docker_inner/
+- [x] 12. `docker_inner/signal-cli.yml`, `docker_inner/postgres.yml`: Delete both project-specific service files — expect only `docker-compose.yml` remains as a .yml file in docker_inner/
   What to do / Must NOT do: `rm docker_inner/signal-cli.yml docker_inner/postgres.yml`. MUST NOT touch `example/docker_inner/postgres.yml` or `example/docker_inner/signal-cli.yml` (still needed for tasks 22-24). MUST NOT delete `docker_inner/docker-compose.yml`.
   Parallelization: Wave 2 | Blocked by: 8 | Blocks: none
   References: `example/docker_inner/postgres.yml`, `example/docker_inner/signal-cli.yml` (untouched)
@@ -276,7 +276,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `ls docker_inner/*.yml` shows only `docker_inner/docker-compose.yml`; failure = if example/ files accidentally deleted, `git restore example/`. Evidence `.omo/evidence/task-12-ls.txt`
   Commit: Y | `chore(docker_inner): remove project-specific service files (moved to bootstrap/)`
 
-- [ ] 13. `docker_inner/.env.testing.template`: Overwrite with generic header + `# BOOTSTRAP_ENV_LINES` marker + commented placeholder-pattern example — expect empty-service template that documents the pattern
+- [x] 13. `docker_inner/.env.testing.template`: Overwrite with generic header + `# BOOTSTRAP_ENV_LINES` marker + commented placeholder-pattern example — expect empty-service template that documents the pattern
   What to do / Must NOT do: Overwrite `docker_inner/.env.testing.template` with:
   ```
   # Generated by docker_inner/up.sh — DO NOT COMMIT.
@@ -297,7 +297,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = down.sh deletion heuristic still matches (grep for `Generated by docker_inner/up.sh` returns 1); failure = if header lost, down.sh won't delete generated file → restore header. Evidence `.omo/evidence/task-13-env-template.txt` (cat output)
   Commit: Y | `feat(docker_inner): make .env.testing.template generic with BOOTSTRAP_ENV_LINES marker`
 
-- [ ] 14. `docker_inner/AGENTS.md`: Strip signal-cli/WhatsApp specifics; keep generic per-worktree stack docs — expect project-agnostic guidance covering rationale, main-vs-worktree table, stack identity, add-a-service recipe, troubleshooting
+- [x] 14. `docker_inner/AGENTS.md`: Strip signal-cli/WhatsApp specifics; keep generic per-worktree stack docs — expect project-agnostic guidance covering rationale, main-vs-worktree table, stack identity, add-a-service recipe, troubleshooting
   What to do / Must NOT do: Overwrite `docker_inner/AGENTS.md`. KEEP (generalized): "When to read this" preamble; "Why docker_inner exists" (per-worktree parallel test isolation on dynamic ports, sysbox-runc outer, plain runc inner); "Main checkout vs worktree" table (`make dev-up` from main exits 64 by design); "Quick start" (make dev-up, TEST_ENV_FILE, make dev-down); "Services" table (empty by default with note: "Services are added via `bootstrap/services/` during bootstrap; see `bootstrap/services/README.md` to add more"); "Generated .env.testing warning" (never commit, gitignored); "Stack identity" (compose project = `${__project_prefix__}-<slug>-<hash8>`, slug = `__PROJECT_PREFIX___DEV_STACK` or basename, hash8 = sha1[:8] of absolute path, override with `__PROJECT_PREFIX___DEV_STACK=my-slug`); "Concurrency" notes (25G cap, docker stats, make dev-prune); "Adding a new service" (3-step recipe from example lines 103-113, generalized); "Lifecycle scripts" table (up/down/reset/status/prune); "Troubleshooting" matrix (generalize: keep `__PROJECT_PREFIX___STACK_SLUG is required`, `docker_inner is for worktrees only (exit 64)`, `Port already in use`, `Healthcheck edits silently fail`; drop signal-cli/JVM cold-start row and "account not registered" row). REMOVE entirely: signal-cli linking section, wasi-bridge/whatsmeow-specific paragraphs, sgnl://linkdevice references.
   Parallelization: Wave 2 | Blocked by: 8 | Blocks: 19, 20
   References: `example/docker_inner/AGENTS.md:1-136` (source), `:103-113` (recipe), `:128-136` (troubleshooting), `docker_inner/*.sh` and `docker_inner/lib/slug.sh` (structure references)
@@ -305,7 +305,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = markdown renders (no dead internal links); failure = if any project-specific string survives, re-sweep. Evidence `.omo/evidence/task-14-agents-md.txt` (grep -c summary)
   Commit: Y | `docs(docker_inner): rewrite AGENTS.md as project-agnostic per-worktree stack guide`
 
-- [ ] 15. `.omo/evidence/task-15-bash-syntax.txt`: Run `bash -n` on all `docker_inner/**/*.sh` — expect every file passes (proof placeholder rewrite is syntactically valid)
+- [x] 15. `.omo/evidence/task-15-bash-syntax.txt`: Run `bash -n` on all `docker_inner/**/*.sh` — expect every file passes (proof placeholder rewrite is syntactically valid)
   What to do / Must NOT do: `{ for f in docker_inner/lib/*.sh docker_inner/*.sh; do printf '=== %s ===\n' "$f"; if bash -n "$f" 2>&1; then echo OK; else echo FAIL; fi; done; } > .omo/evidence/task-15-bash-syntax.txt 2>&1`. MUST NOT modify any script; validation-only.
   Parallelization: Wave 2 | Blocked by: 9, 10 | Blocks: 32
   References: outputs of tasks 9, 10
@@ -317,7 +317,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
      WAVE 3 — Documentation surface (6 todos: 16-21)
      ========================================================================= -->
 
-- [ ] 16. `AGENTS.md` (root): Create protocol pointer + `TEMPLATE_UNINITIALIZED` state detector + delegate to `bootstrap/AGENTS.md` — expect any visiting agent knows what to do
+- [x] 16. `AGENTS.md` (root): Create protocol pointer + `TEMPLATE_UNINITIALIZED` state detector + delegate to `bootstrap/AGENTS.md` — expect any visiting agent knows what to do
   What to do / Must NOT do: Create root `AGENTS.md` with:
     (1) "When to read this" preamble targeting fresh-clone AI agents
     (2) One-paragraph repo identification ("template for AI-driven Go projects using sysbox docker outer + per-worktree inner stack; see README.md for humans")
@@ -331,7 +331,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = any agent reading this immediately knows what the repo is, whether to bootstrap, and which file to read next; failure = if state detection is ambiguous, add explicit `test -e TEMPLATE_UNINITIALIZED` example. Evidence `.omo/evidence/task-16-agents-md.txt` (cat output)
   Commit: Y | `docs: add root AGENTS.md as agent entry point`
 
-- [ ] 17. `README.md` (root): Create human-facing intro with owner's copyable quickstart prompt + prereqs + post-bootstrap dev flow — expect owner reads and knows what to do
+- [x] 17. `README.md` (root): Create human-facing intro with owner's copyable quickstart prompt + prereqs + post-bootstrap dev flow — expect owner reads and knows what to do
   What to do / Must NOT do: Create root `README.md` with sections:
     (1) `# ai-template` — one-paragraph "what it is"
     (2) `## What this repo gives you` — bullet list of `docker/`, `docker_inner/`, `bootstrap/`
@@ -346,7 +346,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = a human can read README, satisfy prereqs, and copy the quickstart prompt into their agent verbatim; failure = if quickstart references files that don't yet exist (like `<name>-dev` container without explaining), add clarifying line. Evidence `.omo/evidence/task-17-readme.txt` (cat output)
   Commit: Y | `docs: add root README.md with owner quickstart`
 
-- [ ] 18. `TEMPLATE_UNINITIALIZED`: Create empty marker with one-line hash comment at repo root — expect bootstrap agent detects fresh template
+- [x] 18. `TEMPLATE_UNINITIALIZED`: Create empty marker with one-line hash comment at repo root — expect bootstrap agent detects fresh template
   What to do / Must NOT do: Write `TEMPLATE_UNINITIALIZED` at repo root with single line: `# Bootstrap has not been run yet. See AGENTS.md.` (hash-comment style; single line). MUST NOT make it executable. MUST NOT add multiple lines.
   Parallelization: Wave 3 | Blocked by: none | Blocks: 34 (dry-run consumes marker)
   References: root `AGENTS.md` (task 16), `bootstrap/AGENTS.md` step 0 preflight (task 19)
@@ -354,7 +354,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `test -e TEMPLATE_UNINITIALIZED` in bootstrap preflight succeeds; failure = if accidentally +x, `chmod -x`. Evidence `.omo/evidence/task-18-marker.txt` (ls -la output)
   Commit: Y | `feat: add TEMPLATE_UNINITIALIZED marker for bootstrap detection`
 
-- [ ] 19. `bootstrap/AGENTS.md`: Author authoritative 16-step bootstrap protocol including non-interactive mode via `BOOTSTRAP_ANSWERS_FILE` — expect any capable agent can execute bootstrap end-to-end
+- [x] 19. `bootstrap/AGENTS.md`: Author authoritative 16-step bootstrap protocol including non-interactive mode via `BOOTSTRAP_ANSWERS_FILE` — expect any capable agent can execute bootstrap end-to-end
   What to do / Must NOT do: Create `bootstrap/AGENTS.md`. Required sections in order:
     - Preamble ("When to read this")
     - `## Modes` — interactive (default) vs non-interactive (`BOOTSTRAP_ANSWERS_FILE=<path>` reads KEY=VALUE fixture; required keys: `TARGET_DIR`, `PROJECT_NAME`, `PROJECT_PREFIX`, `project_prefix`, `PROJECT_MODULE`, `SERVICES` (csv or empty), `GO_SKELETON`, `BINARY`, `FRESH_GIT`, `COMMIT`, `KEEP_BOOTSTRAP`, `BOOTSTRAP_TEMPLATE_SHA`)
@@ -400,7 +400,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = an agent can execute every step with unambiguous instructions and no follow-up questions; failure = if any step references a nonexistent file or has an ambiguous conditional, revise. Evidence `.omo/evidence/task-19-protocol.txt` (grep of numbered steps)
   Commit: Y | `feat(bootstrap): add authoritative 16-step bootstrap protocol`
 
-- [ ] 20. `bootstrap/AGENTS.md.tpl`: Author post-bootstrap replacement for root AGENTS.md with placeholders — expect concrete project doc after bootstrap moves it into place
+- [x] 20. `bootstrap/AGENTS.md.tpl`: Author post-bootstrap replacement for root AGENTS.md with placeholders — expect concrete project doc after bootstrap moves it into place
   What to do / Must NOT do: Create `bootstrap/AGENTS.md.tpl` describing a bootstrapped project (post-sed-rewrite becomes the project's own root AGENTS.md). Sections:
     - Preamble ("When to read this" — targets agents working on the project)
     - `# __PROJECT_NAME__` + one-liner "Module: `__PROJECT_MODULE__`."
@@ -415,7 +415,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = after sed rewrite by bootstrap step 11, the resulting AGENTS.md is a coherent project doc with no stray placeholders; failure = if placeholder unbalanced, verify with `grep -c '__PROJECT_' bootstrap/AGENTS.md.tpl` and adjust. Evidence `.omo/evidence/task-20-tpl.txt`
   Commit: Y | `feat(bootstrap): add AGENTS.md.tpl (post-bootstrap root replacement)`
 
-- [ ] 21. `bootstrap/README.md`: One-paragraph explainer stating "don't run anything from here directly" — expect clear directory-purpose guidance for humans/agents
+- [x] 21. `bootstrap/README.md`: One-paragraph explainer stating "don't run anything from here directly" — expect clear directory-purpose guidance for humans/agents
   What to do / Must NOT do: Create `bootstrap/README.md` (< 100 words): explain that this dir drives one-time template initialization; agents follow `AGENTS.md` here (invoked from root AGENTS.md); humans don't run things from this directory directly — the owner tells their agent to use the parent repo URL. Note that post-bootstrap, this dir may be kept as reference so new services can be added via `services/README.md`. MUST NOT duplicate the protocol.
   Parallelization: Wave 3 | Blocked by: none | Blocks: none
   References: `bootstrap/AGENTS.md`, root `AGENTS.md`
@@ -427,7 +427,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
      WAVE 4 — Bootstrap library: services + go-skeleton (8 todos: 22-29)
      ========================================================================= -->
 
-- [ ] 22. `bootstrap/services/postgres.yml`: Author generalized postgres service with `__project_prefix__` user/db + `runtime: runc` — expect bootstrap can cp+sed to wire postgres into `docker_inner/`
+- [x] 22. `bootstrap/services/postgres.yml`: Author generalized postgres service with `__project_prefix__` user/db + `runtime: runc` — expect bootstrap can cp+sed to wire postgres into `docker_inner/`
   What to do / Must NOT do: Create `bootstrap/services/postgres.yml`. Content: header comment ("Copied into docker_inner/postgres.yml during bootstrap when the owner picks postgres. Placeholders below (`__project_prefix__`) are sed-rewritten by bootstrap."); `services.postgres` with `image: postgres:17-alpine`, `runtime: runc` (NOT sysbox-runc — that's outer-only), `environment` block with `POSTGRES_USER: __project_prefix__`, `POSTGRES_PASSWORD: __project_prefix__`, `POSTGRES_DB: __project_prefix___test` (three underscores between prefix and `test`); `volumes: - postgres_data:/var/lib/postgresql/data`; `ports: - "127.0.0.1::5432"` (dynamic host port); healthcheck `["CMD-SHELL", "pg_isready -U __project_prefix__ -d __project_prefix___test"]` with `interval: 5s`, `timeout: 5s`, `retries: 20`; top-level `volumes: postgres_data:`.
   MUST NOT use hardcoded `wasi` username. MUST NOT set `runtime: sysbox-runc`. MUST NOT bind a fixed host port (must be ephemeral `127.0.0.1::5432`).
   Parallelization: Wave 4 | Blocked by: 10, 11 (references marker conventions in docker_inner) | Blocks: 34
@@ -436,7 +436,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `sed 's/__project_prefix__/testproj/g' bootstrap/services/postgres.yml | docker compose -f - config` renders without errors; failure = if YAML indentation broken (postgres compose files are tab-sensitive in ports/environment blocks), fix. Evidence `.omo/evidence/task-22-postgres-yml.txt`
   Commit: Y | `feat(bootstrap): add postgres service snippet`
 
-- [ ] 23. `bootstrap/services/postgres.env.snippet`: Author .env.testing DSN fragment with `__POSTGRES_PORT__` placeholder — expect bootstrap appends to project's `.env.testing.template`
+- [x] 23. `bootstrap/services/postgres.env.snippet`: Author .env.testing DSN fragment with `__POSTGRES_PORT__` placeholder — expect bootstrap appends to project's `.env.testing.template`
   What to do / Must NOT do: Create `bootstrap/services/postgres.env.snippet` with:
   ```
   # Postgres DSN (dynamic port set by up.sh at each dev-up).
@@ -449,7 +449,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = every non-comment line is valid KEY=VALUE (`awk -F= 'NF < 2 && !/^\s*#/ {exit 1}' bootstrap/services/postgres.env.snippet` returns 0); failure = if KEY has spaces or equals sign missing, fix. Evidence `.omo/evidence/task-23-env-snippet.txt`
   Commit: Y | `feat(bootstrap): add postgres env snippet`
 
-- [ ] 24. `bootstrap/services/postgres.up-snippet.sh`: Author `up.sh` port-discovery fragment for postgres — expect bootstrap splices into `up.sh` at `# BOOTSTRAP_SERVICE_PORTS` marker
+- [x] 24. `bootstrap/services/postgres.up-snippet.sh`: Author `up.sh` port-discovery fragment for postgres — expect bootstrap splices into `up.sh` at `# BOOTSTRAP_SERVICE_PORTS` marker
   What to do / Must NOT do: Create `bootstrap/services/postgres.up-snippet.sh`:
   ```
   # Postgres port discovery (spliced into up.sh at BOOTSTRAP_SERVICE_PORTS by bootstrap).
@@ -477,7 +477,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = an agent following this recipe can wire in a new service without reading `bootstrap/AGENTS.md`; failure = if any marker name inconsistent with actual scripts, fix. Evidence `.omo/evidence/task-25-services-readme.txt`
   Commit: Y | `docs(bootstrap): add services README with 3-step add-a-service recipe`
 
-- [ ] 26. `bootstrap/go-skeleton/go.mod.tpl`: Author go.mod template with `__PROJECT_MODULE__` + `go 1.26` directive — expect bootstrap copies + rewrites to project-root go.mod
+- [x] 26. `bootstrap/go-skeleton/go.mod.tpl`: Author go.mod template with `__PROJECT_MODULE__` + `go 1.26` directive — expect bootstrap copies + rewrites to project-root go.mod
   What to do / Must NOT do: Create `bootstrap/go-skeleton/go.mod.tpl`:
   ```
   module __PROJECT_MODULE__
@@ -491,7 +491,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `sed 's|__PROJECT_MODULE__|example.com/test|' bootstrap/go-skeleton/go.mod.tpl > /tmp/go.mod && cd /tmp && go mod tidy` succeeds (no deps to fetch); failure = if go version drift (Dockerfile has 1.26.2 but tpl says 1.25), align. Evidence `.omo/evidence/task-26-go-mod-tpl.txt`
   Commit: Y | `feat(bootstrap): add go.mod skeleton template`
 
-- [ ] 27. `bootstrap/go-skeleton/cmd/__PROJECT_SLUG__/main.go.tpl`: Author minimal `package main` hello-world with `__PROJECT_NAME__` placeholder — expect scaffolded project compiles
+- [x] 27. `bootstrap/go-skeleton/cmd/__PROJECT_SLUG__/main.go.tpl`: Author minimal `package main` hello-world with `__PROJECT_NAME__` placeholder — expect scaffolded project compiles
   What to do / Must NOT do: `mkdir -p bootstrap/go-skeleton/cmd/__PROJECT_SLUG__/`. Create `bootstrap/go-skeleton/cmd/__PROJECT_SLUG__/main.go.tpl`:
   ```
   package main
@@ -509,7 +509,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = after rename + sed rewrite, `go build ./...` succeeds in a project with the go.mod from task 26; failure = if compilation fails (unlikely — hello world has no non-fmt imports), inspect. Evidence `.omo/evidence/task-27-main-tpl.txt`
   Commit: Y | `feat(bootstrap): add cmd/main.go skeleton template`
 
-- [ ] 28. `bootstrap/go-skeleton/Makefile.tpl`: Author build/test/dev-* targets with tab indentation preserved — expect scaffolded project has usable Makefile
+- [x] 28. `bootstrap/go-skeleton/Makefile.tpl`: Author build/test/dev-* targets with tab indentation preserved — expect scaffolded project has usable Makefile
   What to do / Must NOT do: Create `bootstrap/go-skeleton/Makefile.tpl` with TAB indentation for recipe lines (critical — Make requires tabs):
   ```
   # __PROJECT_NAME__ — Makefile
@@ -544,7 +544,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = after sed rewrite, `make -n -f bootstrap/go-skeleton/Makefile.tpl build 2>&1 | grep -q "go build"` (dry-run recipe expansion works); failure = if tabs become spaces, Make prints `*** missing separator. Stop.` → verify `cat -A bootstrap/go-skeleton/Makefile.tpl` shows `^I` at recipe lines. Evidence `.omo/evidence/task-28-makefile-tpl.txt` (cat -A output)
   Commit: Y | `feat(bootstrap): add Makefile skeleton template with dev-* targets`
 
-- [ ] 29. `bootstrap/go-skeleton/README.md`: One-line explainer of skeleton contents + rename map — expect agent/owner knows what's here
+- [x] 29. `bootstrap/go-skeleton/README.md`: One-line explainer of skeleton contents + rename map — expect agent/owner knows what's here
   What to do / Must NOT do: Create `bootstrap/go-skeleton/README.md` (< 100 words): "Optional Go module skeleton copied into project root during bootstrap when owner picks Y for Go skeleton. Placeholders (`__PROJECT_MODULE__`, `__project_prefix__`, `__PROJECT_NAME__`, dir `__PROJECT_SLUG__`) are sed-rewritten. Files: `go.mod.tpl` → `go.mod` at project root; `cmd/__PROJECT_SLUG__/main.go.tpl` → `cmd/<binary>/main.go`; `Makefile.tpl` → `Makefile` at project root (build/test/dev-up/dev-down/dev-reset/dev-status/dev-prune)." MUST NOT duplicate the protocol.
   Parallelization: Wave 4 | Blocked by: none | Blocks: none
   References: `bootstrap/AGENTS.md` step 10 (task 19)
@@ -564,7 +564,7 @@ Your next move: approve to start work — or ask for a high-accuracy dual review
   QA scenarios: happy = `find example -type f 2>&1 | head -1` returns "No such file or directory"; failure = if adjacent dirs accidentally deleted, `git restore` immediately. Evidence `.omo/evidence/task-30-ls-after-delete.txt` (`ls -la` output)
   Commit: Y | `chore: delete example/ directory (contents templated into docker_inner/ and bootstrap/)`
 
-- [ ] 31. `.gitignore` (root): Create with env/worktree/db exclusions + commented Go build outputs — expect owner-inherited .gitignore covers common cases without ignoring bootstrap/ or the marker
+- [x] 31. `.gitignore` (root): Create with env/worktree/db exclusions + commented Go build outputs — expect owner-inherited .gitignore covers common cases without ignoring bootstrap/ or the marker
   What to do / Must NOT do: Create root `.gitignore`:
   ```
   # Local env overrides (secrets, dev-only settings)

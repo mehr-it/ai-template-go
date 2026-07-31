@@ -1,0 +1,51 @@
+Task 22: Create bootstrap/services/postgres.yml
+================================================
+
+File: bootstrap/services/postgres.yml
+Status: ✓ Created
+
+Content:
+--------
+# Copied into docker_inner/postgres.yml during bootstrap when the owner picks postgres.
+# Placeholders below (`__project_prefix__`) are sed-rewritten by bootstrap.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    # Inner containers use plain runc; sysbox-runc is the outer workspace runtime.
+    runtime: runc
+    environment:
+      POSTGRES_USER: __project_prefix__
+      POSTGRES_PASSWORD: __project_prefix__
+      POSTGRES_DB: __project_prefix___test
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1::5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U __project_prefix__ -d __project_prefix___test"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgres_data:
+
+Verification Results:
+---------------------
+✓ File exists and is non-empty
+✓ Contains __project_prefix__ placeholder (not hardcoded wasi)
+✓ Does NOT contain 'wasi' hardcoded values
+✓ Contains runtime: runc (NOT sysbox-runc)
+✓ Does NOT contain sysbox runtime
+✓ Contains ephemeral port binding 127.0.0.1::5432
+✓ Database name uses triple underscore: __project_prefix___test
+
+Key Features:
+- Generalized postgres service for bootstrap template
+- Uses __project_prefix__ marker for sed-rewriting during bootstrap
+- Inner container runtime (runc, not sysbox-runc)
+- Dynamic host port allocation (127.0.0.1::5432)
+- Postgres 17 Alpine image
+- Health check with pg_isready
+- Persistent postgres_data volume

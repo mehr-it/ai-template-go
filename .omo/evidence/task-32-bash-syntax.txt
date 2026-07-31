@@ -1,0 +1,16 @@
+=== bootstrap/services/postgres.up-snippet.sh ===
+OK
+=== docker/entrypoint.sh ===
+OK
+=== docker_inner/down.sh ===
+OK
+=== docker_inner/lib/slug.sh ===
+OK
+=== docker_inner/prune.sh ===
+OK
+=== docker_inner/reset.sh ===
+OK
+=== docker_inner/status.sh ===
+OK
+=== docker_inner/up.sh ===
+OK

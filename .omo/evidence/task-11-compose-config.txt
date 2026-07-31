@@ -1,0 +1,31 @@
+Task 11: docker_inner/docker-compose.yml Bootstrap Configuration
+================================================================
+
+VERIFICATION RESULTS:
+✓ File overwritten with placeholder project name
+✓ Grep check: name: __project_prefix__-${__PROJECT_PREFIX___STACK_SLUG:?...} found
+✓ Grep check: include: [] found
+✓ Grep check: # BOOTSTRAP_SERVICE_INCLUDES marker found
+✓ YAML validation passed with env var substitution
+✓ Project name renders as: __project_prefix__-test
+✓ Include list is empty: []
+
+FILE CONTENT:
+---
+# Assembled by docker_inner/up.sh — do not invoke directly.
+# Requires __PROJECT_PREFIX___STACK_SLUG, which up.sh derives from the worktree path.
+name: __project_prefix__-${__PROJECT_PREFIX___STACK_SLUG:?__PROJECT_PREFIX___STACK_SLUG is required}
+
+# BOOTSTRAP_SERVICE_INCLUDES — service .yml files appended below by bootstrap.
+# To add a service manually (post-bootstrap):
+#   1. Drop docker_inner/<svc>.yml with a 127.0.0.1::PORT binding and runtime: runc
+#   2. Add "  - <svc>.yml" to the include: block below
+#   3. Add a _get_port stanza to up.sh at BOOTSTRAP_SERVICE_PORTS and a status row to status.sh at BOOTSTRAP_STATUS_ROWS
+include: []
+---
+
+DEPENDENCIES:
+✓ Task 8 (docker_inner/ copy) — complete
+✓ Ready for Task 19, 22 (depend on this task)
+
+TIMESTAMP: 2026-07-31

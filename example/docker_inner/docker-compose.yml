@@ -1,7 +1,0 @@
-# Assembled by docker_inner/up.sh — do not invoke directly.
-# Requires WASI_STACK_SLUG, which up.sh derives from the worktree path.
-name: wasi-${WASI_STACK_SLUG:?WASI_STACK_SLUG is required}
-
-include:
-  - signal-cli.yml
-  - postgres.yml

@@ -8,7 +8,7 @@
       "plan_name": "ai-template-init",
       "status": "active",
       "started_at": "2026-07-31T08:15:22.653Z",
-      "updated_at": "2026-07-31T08:21:07.944Z",
+      "updated_at": "2026-07-31T17:57:07.427Z",
       "session_ids": [
         "opencode:ses_048c1fc51ffeK6U4i6I20cyYWQ"
       ],
@@ -21,12 +21,40 @@
           "task_key": "todo:1",
           "task_label": "1",
           "task_title": "`.omo/evidence/task-1-baseline.txt`: Capture pre-change repo snapshot for audit trail — expect diffable file with tree + selected file contents + before-grep",
-          "session_id": "opencode:ses_048bd12bdffeGXgIXyclepbt2D",
+          "session_id": "opencode:ses_048bc8237ffetJU3A3ZB0u9PWP",
           "agent": "Sisyphus-Junior",
           "category": "quick",
           "started_at": "2026-07-31T08:18:17.252Z",
-          "status": "running",
-          "updated_at": "2026-07-31T08:21:07.945Z"
+          "status": "completed",
+          "updated_at": "2026-07-31T17:42:26.119Z",
+          "ended_at": "2026-07-31T17:42:26.119Z",
+          "elapsed_ms": 33848867
+        },
+        "todo:15": {
+          "task_key": "todo:15",
+          "task_label": "15",
+          "task_title": "`.omo/evidence/task-15-bash-syntax.txt`: Run `bash -n` on all `docker_inner/**/*.sh` — expect every file passes (proof placeholder rewrite is syntactically valid)",
+          "session_id": "opencode:ses_046b7eaf5ffeXY6tXMHDrLUo4o",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "started_at": "2026-07-31T17:44:18.777Z",
+          "status": "completed",
+          "updated_at": "2026-07-31T17:49:44.571Z",
+          "ended_at": "2026-07-31T17:49:44.571Z",
+          "elapsed_ms": 325794
+        },
+        "todo:19": {
+          "task_key": "todo:19",
+          "task_label": "19",
+          "task_title": "`bootstrap/AGENTS.md`: Author authoritative 16-step bootstrap protocol including non-interactive mode via `BOOTSTRAP_ANSWERS_FILE` — expect any capable agent can execute bootstrap end-to-end",
+          "session_id": "opencode:ses_046aff84cffeOAip5QvJ0Ftr05",
+          "agent": "Sisyphus-Junior",
+          "category": "writing",
+          "updated_at": "2026-07-31T17:57:07.427Z",
+          "started_at": "2026-07-31T17:56:28.143Z",
+          "status": "completed",
+          "ended_at": "2026-07-31T17:57:07.427Z",
+          "elapsed_ms": 39284
         }
       }
     }
@@ -34,7 +62,7 @@
   "active_plan": "/home/chris/go/src/mehr-it.info/ai-template/.omo/plans/ai-template-init.md",
   "started_at": "2026-07-31T08:15:22.653Z",
   "status": "active",
-  "updated_at": "2026-07-31T08:21:07.944Z",
+  "updated_at": "2026-07-31T17:57:07.427Z",
   "session_ids": [
     "opencode:ses_048c1fc51ffeK6U4i6I20cyYWQ"
   ],
@@ -47,12 +75,40 @@
       "task_key": "todo:1",
       "task_label": "1",
       "task_title": "`.omo/evidence/task-1-baseline.txt`: Capture pre-change repo snapshot for audit trail — expect diffable file with tree + selected file contents + before-grep",
-      "session_id": "opencode:ses_048bd12bdffeGXgIXyclepbt2D",
+      "session_id": "opencode:ses_048bc8237ffetJU3A3ZB0u9PWP",
       "agent": "Sisyphus-Junior",
       "category": "quick",
       "started_at": "2026-07-31T08:18:17.252Z",
-      "status": "running",
-      "updated_at": "2026-07-31T08:21:07.945Z"
+      "status": "completed",
+      "updated_at": "2026-07-31T17:42:26.119Z",
+      "ended_at": "2026-07-31T17:42:26.119Z",
+      "elapsed_ms": 33848867
+    },
+    "todo:15": {
+      "task_key": "todo:15",
+      "task_label": "15",
+      "task_title": "`.omo/evidence/task-15-bash-syntax.txt`: Run `bash -n` on all `docker_inner/**/*.sh` — expect every file passes (proof placeholder rewrite is syntactically valid)",
+      "session_id": "opencode:ses_046b7eaf5ffeXY6tXMHDrLUo4o",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "started_at": "2026-07-31T17:44:18.777Z",
+      "status": "completed",
+      "updated_at": "2026-07-31T17:49:44.571Z",
+      "ended_at": "2026-07-31T17:49:44.571Z",
+      "elapsed_ms": 325794
+    },
+    "todo:19": {
+      "task_key": "todo:19",
+      "task_label": "19",
+      "task_title": "`bootstrap/AGENTS.md`: Author authoritative 16-step bootstrap protocol including non-interactive mode via `BOOTSTRAP_ANSWERS_FILE` — expect any capable agent can execute bootstrap end-to-end",
+      "session_id": "opencode:ses_046aff84cffeOAip5QvJ0Ftr05",
+      "agent": "Sisyphus-Junior",
+      "category": "writing",
+      "updated_at": "2026-07-31T17:57:07.427Z",
+      "started_at": "2026-07-31T17:56:28.143Z",
+      "status": "completed",
+      "ended_at": "2026-07-31T17:57:07.427Z",
+      "elapsed_ms": 39284
     }
   },
   "agent": "atlas"

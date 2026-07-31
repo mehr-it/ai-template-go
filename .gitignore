@@ -13,6 +13,9 @@ docker/.env
 *-shm
 *-wal
 
+# OpenCode config (user-specific, should not be version-controlled in template)
+opencode.jsonc
+
 # Go build outputs (post-bootstrap — uncomment after scaffolding)
 # /bin/
 # /dist/

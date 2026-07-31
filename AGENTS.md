@@ -1,0 +1,35 @@
+# AGENTS.md — AI Agent Entry Point
+
+## When to read this
+
+You're an AI agent that just cloned or opened this repo. Read this file first. It tells you what state the repo is in and where to go next.
+
+## What this repo is
+
+This is a template for AI-driven Go projects using a sysbox docker outer container plus a per-worktree inner stack. It's not a finished application. See `README.md` for the human-facing overview.
+
+## State detection: is this repo bootstrapped?
+
+Check whether `TEMPLATE_UNINITIALIZED` exists at the repo root.
+
+```
+test -f TEMPLATE_UNINITIALIZED
+```
+
+**If `TEMPLATE_UNINITIALIZED` exists:** this template has NOT been bootstrapped yet. The repo still contains placeholder values and generic structure. Read `bootstrap/AGENTS.md` for the 16-step interview and rewrite protocol that turns this template into a real project.
+
+**If `TEMPLATE_UNINITIALIZED` is absent:** bootstrap has already run. Skip to the project-specific `AGENTS.md` that bootstrap generated for this repo.
+
+## Critical: bootstrap runs on the owner's host
+
+**Bootstrap runs on the owner's host, NOT inside a container.**
+
+The outer docker container only comes up after bootstrap completes. Do NOT run `docker compose up` before bootstrap — placeholder values would leak into container config and the resulting image would be broken.
+
+Run bootstrap from a plain shell on the host machine, not from inside any container.
+
+## If you're reading this in a bootstrapped repo
+
+If `TEMPLATE_UNINITIALIZED` is absent but you're still reading this file, something went wrong during bootstrap. This root `AGENTS.md` should have been replaced from `bootstrap/AGENTS.md.tpl` as part of the bootstrap process.
+
+To recover: restore this file from `bootstrap/AGENTS.md.tpl`, re-run the relevant bootstrap steps, or ask the repo owner what happened.

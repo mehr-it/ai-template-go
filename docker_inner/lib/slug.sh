@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
 # This file is SOURCED, not executed directly.
-# Provides: wasi_resolve_worktree_root, wasi_assert_not_main_checkout, wasi_derive_slug
+# Provides: __project_prefix___resolve_worktree_root, __project_prefix___assert_not_main_checkout, __project_prefix___derive_slug
 set -euo pipefail
 
-WASI_MAIN_CHECKOUT="${WASI_MAIN_CHECKOUT:-/home/ubuntu/workspace}"
+__PROJECT_PREFIX___MAIN_CHECKOUT="${__PROJECT_PREFIX___MAIN_CHECKOUT:-/home/ubuntu/workspace}"
 
-# Sets WASI_WORKTREE_ROOT to the absolute path of the git repo root.
+# Sets __PROJECT_PREFIX___WORKTREE_ROOT to the absolute path of the git repo root.
 # Exits non-zero if not in a git repo.
-wasi_resolve_worktree_root() {
-    WASI_WORKTREE_ROOT="$(git rev-parse --show-toplevel)"
-    export WASI_WORKTREE_ROOT
+__project_prefix___resolve_worktree_root() {
+    __PROJECT_PREFIX___WORKTREE_ROOT="$(git rev-parse --show-toplevel)"
+    export __PROJECT_PREFIX___WORKTREE_ROOT
 }
 
 # Exits 64 (EX_USAGE) if running from the main checkout.
-# Must be called after wasi_resolve_worktree_root.
-wasi_assert_not_main_checkout() {
-    if [[ "${WASI_WORKTREE_ROOT}" == "${WASI_MAIN_CHECKOUT}" ]]; then
+# Must be called after __project_prefix___resolve_worktree_root.
+__project_prefix___assert_not_main_checkout() {
+    if [[ "${__PROJECT_PREFIX___WORKTREE_ROOT}" == "${__PROJECT_PREFIX___MAIN_CHECKOUT}" ]]; then
         echo "docker_inner is for worktrees only; the main checkout has no inner stack" >&2
         exit 64
     fi
 }
 
-# Derives and exports WASI_STACK_SLUG.
-# Slug = sanitized(basename or WASI_DEV_STACK) + "-" + sha1[:8] of worktree path.
+# Derives and exports __PROJECT_PREFIX___STACK_SLUG.
+# Slug = sanitized(basename or __PROJECT_PREFIX___DEV_STACK) + "-" + sha1[:8] of worktree path.
 # Exits 65 (EX_DATAERR) if the sanitized slug is empty.
-wasi_derive_slug() {
+__project_prefix___derive_slug() {
     local raw_slug
-    if [[ -n "${WASI_DEV_STACK:-}" ]]; then
-        raw_slug="${WASI_DEV_STACK}"
+    if [[ -n "${__PROJECT_PREFIX___DEV_STACK:-}" ]]; then
+        raw_slug="${__PROJECT_PREFIX___DEV_STACK}"
     else
-        raw_slug="$(basename "${WASI_WORKTREE_ROOT}")"
+        raw_slug="$(basename "${__PROJECT_PREFIX___WORKTREE_ROOT}")"
     fi
 
     # Sanitize: lowercase, replace non-alphanumeric-dash with dash, collapse dashes, trim
@@ -43,8 +43,8 @@ wasi_derive_slug() {
 
     # Uniqueness suffix: 8-char sha1 of the worktree absolute path
     local suffix
-    suffix="$(printf '%s' "${WASI_WORKTREE_ROOT}" | sha1sum | cut -c1-8)"
+    suffix="$(printf '%s' "${__PROJECT_PREFIX___WORKTREE_ROOT}" | sha1sum | cut -c1-8)"
 
-    export WASI_STACK_SLUG="${sanitized}-${suffix}"
-    printf '%s\n' "${WASI_STACK_SLUG}"
+    export __PROJECT_PREFIX___STACK_SLUG="${sanitized}-${suffix}"
+    printf '%s\n' "${__PROJECT_PREFIX___STACK_SLUG}"
 }

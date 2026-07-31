@@ -4,7 +4,7 @@ set -euo pipefail
 # Prune orphan wasi-* compose stacks whose worktree no longer exists.
 # Standalone — does NOT source lib/slug.sh (operates across all stacks).
 
-MAIN_CHECKOUT="${WASI_MAIN_CHECKOUT:-/home/ubuntu/workspace}"
+MAIN_CHECKOUT="${__PROJECT_PREFIX___MAIN_CHECKOUT:-/home/ubuntu/workspace}"
 
 YES=false
 for arg in "$@"; do
@@ -19,7 +19,7 @@ mapfile -t LIVE_WORKTREES < <(git worktree list --porcelain | awk '/^worktree /{
 
 # Collect wasi-* compose projects
 mapfile -t PROJECTS < <(docker compose ls --format json 2>/dev/null | \
-    jq -r '.[] | select(.Name | startswith("wasi-")) | .Name' 2>/dev/null || true)
+    jq -r '.[] | select(.Name | startswith("__project_prefix__-")) | .Name' 2>/dev/null || true)
 
 if [[ ${#PROJECTS[@]} -eq 0 ]]; then
     echo "[docker_inner] no orphan wasi-* stacks found."

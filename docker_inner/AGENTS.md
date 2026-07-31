@@ -5,9 +5,9 @@
 ## Why docker_inner exists
 
 Multiple agents run in parallel git worktrees (`.worktrees/<name>/`). Each needs its own
-signal-cli daemon and database for integration tests. The inner Docker daemon
-(sysbox-enabled, started by `docker/entrypoint.sh`) lets each worktree run an isolated
-stack on dynamic `127.0.0.1` ports, so two agents never fight over port 8080.
+isolated services for integration tests. The inner Docker daemon (sysbox-runc outer,
+plain runc inner, started by `docker/entrypoint.sh`) lets each worktree run an isolated
+stack on dynamic `127.0.0.1` ports, so two agents never fight over the same port.
 
 ## Main checkout vs worktree
 
@@ -31,11 +31,7 @@ make dev-down
 
 | Service | Container port | Purpose |
 |---|---|---|
-| `signal-cli` | 8080 | JSON-RPC daemon: `POST /api/v1/rpc`, SSE stream `GET /api/v1/events`, health `GET /api/v1/check` |
-| `postgres` | 5432 | Optional whatsmeow session store. Unused while the bridge stays on SQLite. |
-
-There is no WhatsApp service: whatsmeow is a library that talks to WhatsApp's servers
-directly, so the only WhatsApp-side state is the local session store.
+| _(none by default)_ | — | Services are added via `bootstrap/services/` during bootstrap; see `bootstrap/services/README.md` to add more |
 
 ## Generated `.env.testing` — NEVER COMMIT
 
@@ -48,57 +44,22 @@ restart. It is gitignored; keep it that way. `down.sh` deletes it again.
 Each worktree stack gets a unique compose project name:
 
 ```
-wasi-<slug>-<hash8>
+${__project_prefix__}-<slug>-<hash8>
 ```
 
-- `slug` = `${WASI_DEV_STACK}` (if set) or `basename` of the worktree directory
+- `slug` = `${__PROJECT_PREFIX___DEV_STACK}` (if set) or `basename` of the worktree directory
 - `hash8` = first 8 chars of `sha1sum` of the worktree absolute path, so two worktrees
   with the same basename still get distinct stacks
 
-Override the slug: `WASI_DEV_STACK=my-custom-slug make dev-up`
+Override the slug: `__PROJECT_PREFIX___DEV_STACK=my-custom-slug make dev-up`
 
-## Linking a Signal account
-
-The daemon starts in **multi-account mode with no account linked**. That is enough to
-develop and test the JSON-RPC client — `version` and `listAccounts` both answer, and
-`listAccounts` returns `[]`. Account-scoped calls like `send` will fail until you link.
-
-**First-class path — `wasi-bridge --link-signal`:**
-
-```bash
-cd .worktrees/<name>/
-make dev-up   # stack must be running; writes .env.testing with SIGNAL_RPC_URL
-wasi-bridge --link-signal --config config.yaml --qr-terminal
-```
-
-Scan the QR printed to your terminal from Signal → Settings → Linked devices. The
-bridge pairs, reports success, and exits. Credentials land in the `signal_cli_data`
-volume; see the warning below about `--qr-terminal` and container logs — prefer
-`--qr-dir` (the default) if you're not on an interactive TTY.
-
-**Fallback — one-off container (no binary required):**
-
-```bash
-cd .worktrees/<name>/
-source docker_inner/lib/slug.sh
-wasi_resolve_worktree_root && wasi_derive_slug >/dev/null
-
-docker compose -p "wasi-${WASI_STACK_SLUG}" -f docker_inner/docker-compose.yml \
-  run --rm signal-cli link -n wasi-bridge-dev
-```
-
-It prints the `sgnl://linkdevice?...` URI, then blocks until the phone completes the scan.
-
-Prefer **linking as a secondary device** over `register`ing a fresh number — see the root
-`AGENTS.md`. Credentials land in the `signal_cli_data` volume, which `make dev-down`
-**wipes** (`down -v`). Use `docker compose stop` instead if you want to keep a linked
-account between sessions.
+The resolved value is exported as `__PROJECT_PREFIX___STACK_SLUG` and used by all
+lifecycle scripts to address the correct compose project.
 
 ## Concurrency
 
-signal-cli is a JVM and is the heavy service here; postgres is light. The workspace
-container is capped at 25 GB. Watch `docker stats` if things slow down, and
-`make dev-prune` to reap stacks from deleted worktrees.
+The workspace container is capped at 25 GB. Watch `docker stats` if things slow down,
+and `make dev-prune` to reap stacks from deleted worktrees.
 
 ## Adding a new service
 
@@ -120,7 +81,7 @@ That's it. No registry, no generator, no framework.
 | `down.sh` | Stop containers, wipe volumes, remove generated `.env.testing` |
 | `reset.sh` | `down.sh` then `up.sh` — fresh volumes |
 | `status.sh` | `compose ps` + port table |
-| `prune.sh [--yes]` | Reap `wasi-*` stacks whose worktree no longer exists |
+| `prune.sh [--yes]` | Reap project stacks whose worktree no longer exists |
 
 `make dev-up` / `dev-down` / `dev-reset` / `dev-status` / `dev-prune` delegate to these.
 
@@ -128,9 +89,7 @@ That's it. No registry, no generator, no framework.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `WASI_STACK_SLUG is required` | Ran compose directly without `up.sh` | Use `make dev-up` |
+| `__PROJECT_PREFIX___STACK_SLUG is required` | Ran compose directly without `up.sh` | Use `make dev-up` |
 | `docker_inner is for worktrees only` (exit 64) | Ran `make dev-up` from the main checkout | `cd .worktrees/<name>/` first |
-| signal-cli healthcheck never goes green | JVM cold start exceeded `start_period` | Check `docker compose logs signal-cli`; it must log `Started HTTP server on /0.0.0.0:8080` |
-| RPC returns "account not registered" | No account linked — expected on a fresh stack | Link one (above), or stick to `version` / `listAccounts` |
 | `Port already in use` | Stale containers from a crashed session | `make dev-down`, or `make dev-prune` |
 | Healthcheck edits silently fail | The image has no `curl`/`wget`/`nc`, and `/bin/sh` is dash without `/dev/tcp` | Keep `CMD` + `bash -c`, never `CMD-SHELL` |

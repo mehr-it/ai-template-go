@@ -1,0 +1,26 @@
+Task 14: docker_inner/AGENTS.md rewrite verification
+=====================================================
+
+grep -c 'signal-cli|whatsmeow|wasi-bridge' docker_inner/AGENTS.md
+0
+
+grep -c '__PROJECT_PREFIX___STACK_SLUG' docker_inner/AGENTS.md
+2
+
+grep -ci 'Adding a new service' docker_inner/AGENTS.md
+2
+
+grep -ci 'main checkout' docker_inner/AGENTS.md
+4
+
+wc -l < docker_inner/AGENTS.md
+95  (within required 60-130 range)
+
+Verification command result:
+0
+0
+PASS: zero forbidden terms
+PASS: __PROJECT_PREFIX___STACK_SLUG present
+PASS: 'Adding a new service' section present
+PASS: 'Main checkout' section present
+PASS: line count 95 within [60,130]

@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "active_work_id": "ai-template-init-92c0c13f",
+  "works": {
+    "ai-template-init-92c0c13f": {
+      "work_id": "ai-template-init-92c0c13f",
+      "active_plan": "/home/chris/go/src/mehr-it.info/ai-template/.omo/plans/ai-template-init.md",
+      "plan_name": "ai-template-init",
+      "status": "active",
+      "started_at": "2026-07-31T08:15:22.653Z",
+      "updated_at": "2026-07-31T08:21:07.944Z",
+      "session_ids": [
+        "opencode:ses_048c1fc51ffeK6U4i6I20cyYWQ"
+      ],
+      "session_origins": {
+        "opencode:ses_048c1fc51ffeK6U4i6I20cyYWQ": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {
+        "todo:1": {
+          "task_key": "todo:1",
+          "task_label": "1",
+          "task_title": "`.omo/evidence/task-1-baseline.txt`: Capture pre-change repo snapshot for audit trail — expect diffable file with tree + selected file contents + before-grep",
+          "session_id": "opencode:ses_048bd12bdffeGXgIXyclepbt2D",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "started_at": "2026-07-31T08:18:17.252Z",
+          "status": "running",
+          "updated_at": "2026-07-31T08:21:07.945Z"
+        }
+      }
+    }
+  },
+  "active_plan": "/home/chris/go/src/mehr-it.info/ai-template/.omo/plans/ai-template-init.md",
+  "started_at": "2026-07-31T08:15:22.653Z",
+  "status": "active",
+  "updated_at": "2026-07-31T08:21:07.944Z",
+  "session_ids": [
+    "opencode:ses_048c1fc51ffeK6U4i6I20cyYWQ"
+  ],
+  "session_origins": {
+    "opencode:ses_048c1fc51ffeK6U4i6I20cyYWQ": "direct"
+  },
+  "plan_name": "ai-template-init",
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "`.omo/evidence/task-1-baseline.txt`: Capture pre-change repo snapshot for audit trail — expect diffable file with tree + selected file contents + before-grep",
+      "session_id": "opencode:ses_048bd12bdffeGXgIXyclepbt2D",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "started_at": "2026-07-31T08:18:17.252Z",
+      "status": "running",
+      "updated_at": "2026-07-31T08:21:07.945Z"
+    }
+  },
+  "agent": "atlas"
+}

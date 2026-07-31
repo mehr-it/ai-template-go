@@ -1,0 +1,89 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "~/.config/opencode/references/*": "allow", // references from AGENTS.md
+      ".env.example": "allow",
+      ".env.local.testing": "allow",
+      ".env.testing": "allow",
+      "docker/.env": "allow",
+      "/tmp/*": "allow",
+      "/docker_inner/*": "allow",
+      "/home/ubuntu/workspace/*": "allow",
+      "/home/ubuntu/workspace/.worktrees/*": "allow"
+    },
+    "external_directory": {
+      "~/.config/opencode/references/**": "allow",
+      "/tmp/**": "allow",
+      "~/.agents/**": "allow",
+      "~/go/**": "allow",
+      "**": "allow"
+    },
+    "write": {
+      ".env.example": "allow",
+      ".env.local.testing": "allow",
+      ".env.testing": "allow",
+      "/tmp/*": "allow",
+      "/docker_inner/*": "allow",
+      "/home/ubuntu/workspace/*": "allow",
+      "/home/ubuntu/workspace/.worktrees/*": "allow"
+    }
+  },
+  //  "formatter": {
+  //    "php-cs-fixer": {
+  //      "command": ["php-cs-fixer", "fix", "$FILE"],
+  //      "extensions": [".php"],
+  //      "environment": {
+  //        "PHP_CS_FIXER_IGNORE_ENV": "1",
+  //      },
+  //    },
+  //  },
+  "plugin": ["opencode-claude-auth@latest", "oh-my-openagent@latest"],
+  "mcp": {
+    "browser": {
+      "type": "local",
+      "command": ["npx", "-y", "agent-browser-protocol", "--mcp"],
+      "enabled": false,
+      "environment": {}
+    },
+    "context7": {
+      "type": "local",
+      "command": ["node", "/home/ubuntu/.opencode/node_modules/.bin/context7-mcp"],
+      "enabled": false
+    },
+    "filesystem": {
+      "type": "local",
+      "command": ["node", "/home/ubuntu/.opencode/node_modules/.bin/mcp-server-filesystem", "/home/ubuntu/workspace"],
+      "enabled": false
+    },
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "codegraph",
+        "serve",
+        "--mcp"
+      ],
+      "enabled": true
+    }
+    //    "gitlab": {
+    //      "type": "local",
+    //      "command": [
+    //        "sh",
+    //        "-c",
+    //        "GITLAB_PERSONAL_ACCESS_TOKEN=$GITLAB_AI_TOKEN npx -y @zereight/mcp-gitlab",
+    //      ],
+    //      "environment": {
+    //        "GITLAB_API_URL": "https://git.tibidono.com/api/v4",
+    //      },
+    //      "enabled": false,
+    //      // },
+    //      // "playwright-headless": {
+    //      //   "type": "local",
+    //      //   "command": ["npx", "-y", "@playwright/mcp@latest", "--headless"],
+    //      //   "enabled": true
+    //    },
+  },
+  "lsp": {
+
+  }
+}

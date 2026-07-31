@@ -1,0 +1,28 @@
+TASK 2: Rename docker/entyrpoint.sh → docker/entrypoint.sh
+=============================================================
+
+EXECUTION SUMMARY
+-----------------
+✓ File renamed: docker/entrypoint.sh exists
+✓ Old file removed: docker/entyrpoint.sh does NOT exist
+✓ Content unchanged: 39 lines, shebang #!/usr/bin/env bash intact
+✓ Dockerfile COPY line verified: COPY --chmod=775 entrypoint.sh /usr/local/bin/entrypoint.sh
+✓ Committed: fix(docker): rename entyrpoint.sh → entrypoint.sh (typo)
+
+GIT STATUS (post-commit)
+------------------------
+On branch master
+nothing to commit, working tree clean
+
+VERIFICATION CHECKS
+-------------------
+✓ test -f docker/entrypoint.sh → PASS (file exists)
+✓ ! test -e docker/entyrpoint.sh → PASS (old file gone)
+✓ head -1 docker/entrypoint.sh → #!/usr/bin/env bash (correct)
+✓ grep -q 'COPY.*entrypoint.sh' docker/Dockerfile → PASS (Dockerfile matches)
+
+COMMIT HASH
+-----------
+7043c03 fix(docker): rename entyrpoint.sh → entrypoint.sh (typo)
+
+STATUS: ✓ COMPLETE

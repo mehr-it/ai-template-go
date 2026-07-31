@@ -1,0 +1,21 @@
+# Local env overrides (secrets, dev-only settings)
+.env
+.env.testing
+.env.local
+.env.local.testing
+docker/.env
+
+# Per-worktree state (worktree dirs are conventionally at .worktrees/)
+.worktrees/
+
+# SQLite DBs from tests
+*.db
+*-shm
+*-wal
+
+# Go build outputs (post-bootstrap — uncomment after scaffolding)
+# /bin/
+# /dist/
+# *.test
+# *.out
+# coverage.*

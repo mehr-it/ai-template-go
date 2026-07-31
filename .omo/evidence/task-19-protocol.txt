@@ -1,0 +1,17 @@
+### 0. Preflight
+### 1. Target-directory interview
+### 2. Project identity interview
+### 3. Service selection
+### 4. Go skeleton
+### 5. Fresh git
+### 6. Commit on completion
+### 7. Keep bootstrap dir
+### 8. Sed rewrite protocol
+### 9. Wire selected services
+### 10. Go skeleton (if selected)
+### 11. Replace root AGENTS.md
+### 12. Delete TEMPLATE_UNINITIALIZED
+### 13. Optionally delete bootstrap/
+### 14. Optionally reset git and commit
+### 15. Post-bootstrap validation
+### 16. Success summary

@@ -1,0 +1,1 @@
+-rw-rw-r-- 1 1000 1000 49 Jul 31 19:44 /home/chris/go/src/mehr-it.info/ai-template/TEMPLATE_UNINITIALIZED

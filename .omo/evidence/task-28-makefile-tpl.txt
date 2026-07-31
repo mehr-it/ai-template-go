@@ -1,0 +1,24 @@
+# __PROJECT_NAME__ M-bM-^@M-^T Makefile$
+$
+.PHONY: build test dev-up dev-down dev-reset dev-status dev-prune$
+$
+build:$
+^Igo build -o ./bin/__project_prefix__ ./cmd/...$
+$
+test:$
+^Igo test -race ./...$
+$
+dev-up:$
+^I@bash docker_inner/up.sh$
+$
+dev-down:$
+^I@bash docker_inner/down.sh$
+$
+dev-reset:$
+^I@bash docker_inner/reset.sh$
+$
+dev-status:$
+^I@bash docker_inner/status.sh$
+$
+dev-prune:$
+^I@bash docker_inner/prune.sh$

@@ -3,6 +3,11 @@ set -euo pipefail
 
 sudo service docker start
 
+# Docker auto-creates missing bind-mount sources as root. Reclaim ownership so
+# uid 1000 (ubuntu) can write session data. No-op when host dirs already exist
+# owned by uid 1000. Non-recursive: credential file overlays inside are untouched.
+sudo chown ubuntu:ubuntu /home/ubuntu/.local/share/opencode /home/ubuntu/.claude 2>/dev/null || true
+
 MCP_DIR="$HOME/.opencode"
 MCP_PACKAGES=(
   "@upstash/context7-mcp"

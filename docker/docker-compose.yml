@@ -13,8 +13,24 @@ services:
       - GID=${GID:-1000}
     volumes:
       - ./opencode/config/:/home/ubuntu/.config/opencode
-      - ~/.local/share/opencode:/home/ubuntu/.local/share/opencode
-      - ~/.claude/:/home/ubuntu/.claude
+
+      # AI session stores at repo root: isolated from host sessions, persistent
+      # across container recreation, shared across all worktrees inside the
+      # container. Opencode/Claude internally namespace sessions by CWD, so the
+      # TUI session picker stays clean per worktree. See /.ai-sessions/ in
+      # .gitignore. git clean -fdx will wipe this — use -e .ai-sessions to keep.
+      - ../.ai-sessions/opencode:/home/ubuntu/.local/share/opencode
+      - ../.ai-sessions/claude:/home/ubuntu/.claude
+
+      # Credential overlays: single files bind-mounted on top of the session
+      # stores above so login state is inherited from the host. Source files
+      # MUST exist — log in to opencode/claude on the host first, or comment
+      # out the tool you don't use. Writes (e.g. OAuth refresh) propagate back
+      # to the host; add :ro if you want read-only credentials in the container.
+      - ${HOME}/.local/share/opencode/auth.json:/home/ubuntu/.local/share/opencode/auth.json
+      - ${HOME}/.local/share/opencode/account.json:/home/ubuntu/.local/share/opencode/account.json
+      - ${HOME}/.claude/.credentials.json:/home/ubuntu/.claude/.credentials.json
+
       - ~/.gitconfig:/home/ubuntu/.gitconfig:ro
       - ../:/home/ubuntu/workspace
     working_dir: /home/ubuntu/workspace

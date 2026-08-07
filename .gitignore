@@ -8,6 +8,11 @@ docker/.env
 # Per-worktree state (worktree dirs are conventionally at .worktrees/)
 .worktrees/
 
+# AI session stores (opencode SQLite DB, claude project histories, transcripts).
+# Bind-mounted into the container at /home/ubuntu/.local/share/opencode and
+# /home/ubuntu/.claude. Can grow to multi-GB — never commit.
+/.ai-sessions/
+
 # SQLite DBs from tests
 *.db
 *-shm

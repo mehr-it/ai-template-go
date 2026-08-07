@@ -4,8 +4,8 @@ A template for AI-driven Go projects. It pairs a [sysbox](https://github.com/nes
 
 ## What this repo gives you
 
-- `docker/` — outer container definition: the long-lived sysbox container your team SSHs into or `exec`s into for all dev work
-- `docker_inner/` — inner stack templates: per-worktree compose files the agent brings up inside the outer container (database, app, tooling)
+- `dev-container/` — outer container definition: the long-lived sysbox container your team SSHs into or `exec`s into for all dev work
+- `dev-container-inner/` — inner stack templates: per-worktree compose files the agent brings up inside the outer container (database, app, tooling)
 - `bootstrap/` — the 16-step interview and rewrite protocol that turns this template into a real project; run it once, then discard
 
 ## Prerequisites (Linux host)
@@ -27,7 +27,7 @@ Substitute your fork URL for `github.com/mehr-it/ai-template` and your actual pr
 ## After bootstrap
 
 ```bash
-cd <name>/docker
+cd <name>/dev-container
 docker compose up -d
 docker exec -it <name>-dev bash
 ```
@@ -47,4 +47,4 @@ sysbox is Linux-only. On macOS with Docker Desktop, the outer container will fai
 Your options:
 
 - Run on a Linux host or Linux VM (recommended)
-- Edit `docker/docker-compose.yml` to remove the `runtime: sysbox-runc` line — the outer container will start, but Docker-in-Docker inside it won't function
+- Edit `dev-container/docker-compose.yml` to remove the `runtime: sysbox-runc` line — the outer container will start, but Docker-in-Docker inside it won't function

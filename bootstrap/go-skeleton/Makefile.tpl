@@ -9,16 +9,16 @@ test:
 	go test -race ./...
 
 dev-up:
-	@bash docker_inner/up.sh
+	@bash dev-container-inner/up.sh
 
 dev-down:
-	@bash docker_inner/down.sh
+	@bash dev-container-inner/down.sh
 
 dev-reset:
-	@bash docker_inner/reset.sh
+	@bash dev-container-inner/reset.sh
 
 dev-status:
-	@bash docker_inner/status.sh
+	@bash dev-container-inner/status.sh
 
 dev-prune:
-	@bash docker_inner/prune.sh
+	@bash dev-container-inner/prune.sh

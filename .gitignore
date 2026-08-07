@@ -3,7 +3,7 @@
 .env.testing
 .env.local
 .env.local.testing
-docker/.env
+dev-container/.env
 
 # Per-worktree state (worktree dirs are conventionally at .worktrees/)
 .worktrees/

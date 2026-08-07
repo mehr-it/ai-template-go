@@ -1,12 +1,12 @@
-> **When to read this**: You're starting/stopping the per-worktree dev stack, debugging a docker_inner script, or adding a new service to it.
+> **When to read this**: You're starting/stopping the per-worktree dev stack, debugging a dev-container-inner script, or adding a new service to it.
 
-# docker_inner — Per-Worktree Dev Stack
+# dev-container-inner — Per-Worktree Dev Stack
 
-## Why docker_inner exists
+## Why dev-container-inner exists
 
 Multiple agents run in parallel git worktrees (`.worktrees/<name>/`). Each needs its own
 isolated services for integration tests. The inner Docker daemon (sysbox-runc outer,
-plain runc inner, started by `docker/entrypoint.sh`) lets each worktree run an isolated
+plain runc inner, started by `dev-container/entrypoint.sh`) lets each worktree run an isolated
 stack on dynamic `127.0.0.1` ports, so two agents never fight over the same port.
 
 ## Main checkout vs worktree
@@ -14,7 +14,7 @@ stack on dynamic `127.0.0.1` ports, so two agents never fight over the same port
 | Where you are | What you use | Why |
 |---|---|---|
 | Main checkout (`/home/ubuntu/workspace/`) | Nothing — the scripts refuse to run | No parallelism needed; there is no outer data stack to conflict with |
-| Worktree (`.worktrees/<name>/`) | `docker_inner/up.sh` + generated `.env.testing` | Parallel isolated test stacks per agent |
+| Worktree (`.worktrees/<name>/`) | `dev-container-inner/up.sh` + generated `.env.testing` | Parallel isolated test stacks per agent |
 
 Running `make dev-up` from the main checkout exits **64** by design.
 
@@ -65,9 +65,9 @@ and `make dev-prune` to reap stacks from deleted worktrees.
 
 Three steps, no abstraction layer:
 
-1. Drop `docker_inner/<svc>.yml` (service definition with a `127.0.0.1::PORT` binding and
+1. Drop `dev-container-inner/<svc>.yml` (service definition with a `127.0.0.1::PORT` binding and
    `runtime: runc`)
-2. Add it to the `include:` block in `docker_inner/docker-compose.yml`
+2. Add it to the `include:` block in `dev-container-inner/docker-compose.yml`
 3. Add a `_get_port` call plus a `sed` substitution stanza to `up.sh`, a placeholder to
    `.env.testing.template`, and a row to `status.sh`
 
@@ -90,6 +90,6 @@ That's it. No registry, no generator, no framework.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `__PROJECT_PREFIX___STACK_SLUG is required` | Ran compose directly without `up.sh` | Use `make dev-up` |
-| `docker_inner is for worktrees only` (exit 64) | Ran `make dev-up` from the main checkout | `cd .worktrees/<name>/` first |
+| `dev-container-inner is for worktrees only` (exit 64) | Ran `make dev-up` from the main checkout | `cd .worktrees/<name>/` first |
 | `Port already in use` | Stale containers from a crashed session | `make dev-down`, or `make dev-prune` |
 | Healthcheck edits silently fail | The image has no `curl`/`wget`/`nc`, and `/bin/sh` is dash without `/dev/tcp` | Keep `CMD` + `bash -c`, never `CMD-SHELL` |

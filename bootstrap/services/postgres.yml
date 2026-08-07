@@ -1,4 +1,4 @@
-# Copied into docker_inner/postgres.yml during bootstrap when the owner picks postgres.
+# Copied into dev-container-inner/postgres.yml during bootstrap when the owner picks postgres.
 # Placeholders below (`__project_prefix__`) are sed-rewritten by bootstrap.
 
 services:

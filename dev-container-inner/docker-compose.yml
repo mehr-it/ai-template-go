@@ -1,10 +1,10 @@
-# Assembled by docker_inner/up.sh — do not invoke directly.
+# Assembled by dev-container-inner/up.sh — do not invoke directly.
 # Requires __PROJECT_PREFIX___STACK_SLUG, which up.sh derives from the worktree path.
 name: __project_prefix__-${__PROJECT_PREFIX___STACK_SLUG:?__PROJECT_PREFIX___STACK_SLUG is required}
 
 # BOOTSTRAP_SERVICE_INCLUDES — service .yml files appended below by bootstrap.
 # To add a service manually (post-bootstrap):
-#   1. Drop docker_inner/<svc>.yml with a 127.0.0.1::PORT binding and runtime: runc
+#   1. Drop dev-container-inner/<svc>.yml with a 127.0.0.1::PORT binding and runtime: runc
 #   2. Add "  - <svc>.yml" to the include: block below
 #   3. Add a _get_port stanza to up.sh at BOOTSTRAP_SERVICE_PORTS and a status row to status.sh at BOOTSTRAP_STATUS_ROWS
 include: []

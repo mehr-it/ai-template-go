@@ -1,6 +1,6 @@
 # bootstrap/services/
 
-Snippet library for services that can be added to `docker_inner/` during bootstrap or later.
+Snippet library for services that can be added to `dev-container-inner/` during bootstrap or later.
 
 ---
 
@@ -10,9 +10,9 @@ Each service ships as a triplet of files. Bootstrap splices them into the inner 
 
 | File | Purpose | Splice target |
 |------|---------|---------------|
-| `<svc>.yml` | Docker Compose service definition | `docker_inner/docker-compose.yml` `include:` block (`BOOTSTRAP_SERVICE_INCLUDES`) |
-| `<svc>.env.snippet` | `.env.testing` DSN/port fragment | `docker_inner/.env.testing.template` at `BOOTSTRAP_ENV_LINES` |
-| `<svc>.up-snippet.sh` | Port-discovery + sed stanza | `docker_inner/up.sh` at `BOOTSTRAP_SERVICE_PORTS` |
+| `<svc>.yml` | Docker Compose service definition | `dev-container-inner/docker-compose.yml` `include:` block (`BOOTSTRAP_SERVICE_INCLUDES`) |
+| `<svc>.env.snippet` | `.env.testing` DSN/port fragment | `dev-container-inner/.env.testing.template` at `BOOTSTRAP_ENV_LINES` |
+| `<svc>.up-snippet.sh` | Port-discovery + sed stanza | `dev-container-inner/up.sh` at `BOOTSTRAP_SERVICE_PORTS` |
 
 Placeholders used across all three files:
 
@@ -54,53 +54,53 @@ sed -i \
   "bootstrap/services/<svc>.yml"
 ```
 
-Then copy the rewritten file into `docker_inner/`:
+Then copy the rewritten file into `dev-container-inner/`:
 
 ```bash
-cp "bootstrap/services/<svc>.yml" "docker_inner/<svc>.yml"
+cp "bootstrap/services/<svc>.yml" "dev-container-inner/<svc>.yml"
 ```
 
-### Step 2 — Splice into docker_inner/
+### Step 2 — Splice into dev-container-inner/
 
 Five splice points, one per marker:
 
-**`BOOTSTRAP_SERVICE_INCLUDES`** in `docker_inner/docker-compose.yml` — add the include line:
+**`BOOTSTRAP_SERVICE_INCLUDES`** in `dev-container-inner/docker-compose.yml` — add the include line:
 
 ```bash
 # If include: [] is still the placeholder form:
-sed -i "s|include: \[\]|include:\n  - <svc>.yml|" docker_inner/docker-compose.yml
+sed -i "s|include: \[\]|include:\n  - <svc>.yml|" dev-container-inner/docker-compose.yml
 # If other services are already listed, append manually.
 ```
 
-**`BOOTSTRAP_SERVICE_PORTS`** in `docker_inner/up.sh` — insert the port-discovery stanza:
+**`BOOTSTRAP_SERVICE_PORTS`** in `dev-container-inner/up.sh` — insert the port-discovery stanza:
 
 ```bash
-sed -i "/# BOOTSTRAP_SERVICE_PORTS/r bootstrap/services/<svc>.up-snippet.sh" docker_inner/up.sh
+sed -i "/# BOOTSTRAP_SERVICE_PORTS/r bootstrap/services/<svc>.up-snippet.sh" dev-container-inner/up.sh
 ```
 
-**`BOOTSTRAP_SUMMARY_LINES`** in `docker_inner/up.sh` — add a human-readable summary echo:
+**`BOOTSTRAP_SUMMARY_LINES`** in `dev-container-inner/up.sh` — add a human-readable summary echo:
 
 ```bash
 SVC_UPPER="$(echo "<svc>" | tr '[:lower:]' '[:upper:]')"
-sed -i "/# BOOTSTRAP_SUMMARY_LINES/a\\  echo \"[docker_inner] <svc>  127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
-  docker_inner/up.sh
+sed -i "/# BOOTSTRAP_SUMMARY_LINES/a\\  echo \"[dev-container-inner] <svc>  127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
+  dev-container-inner/up.sh
 ```
 
-**`BOOTSTRAP_ENV_LINES`** in `docker_inner/.env.testing.template` — append the DSN fragment:
+**`BOOTSTRAP_ENV_LINES`** in `dev-container-inner/.env.testing.template` — append the DSN fragment:
 
 ```bash
 sed -i "/# BOOTSTRAP_ENV_LINES/r bootstrap/services/<svc>.env.snippet" \
-  docker_inner/.env.testing.template
+  dev-container-inner/.env.testing.template
 ```
 
-**`BOOTSTRAP_STATUS_ROWS`** in `docker_inner/status.sh` — add a port-lookup and table row:
+**`BOOTSTRAP_STATUS_ROWS`** in `dev-container-inner/status.sh` — add a port-lookup and table row:
 
 ```bash
 SVC_UPPER="$(echo "<svc>" | tr '[:lower:]' '[:upper:]')"
 sed -i "/# BOOTSTRAP_STATUS_ROWS/a\\
 ${SVC_UPPER}_PORT=\"\$(docker compose port <svc> <container_port> 2>/dev/null | cut -d: -f2)\"\\
 printf \"%-20s %s\\\\n\" \"<svc>\" \"127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
-  docker_inner/status.sh
+  dev-container-inner/status.sh
 ```
 
 ### Step 3 — Verify healthy startup

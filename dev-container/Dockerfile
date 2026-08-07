@@ -52,8 +52,8 @@ RUN mkdir -p /home/ubuntu/.config && chmod -R u+w /home/ubuntu/.config
 RUN mkdir -p /home/ubuntu/.local/share && chmod -R u+w /home/ubuntu/.local
 
 # The inner Docker daemon (installed below) is the precondition for the
-# per-worktree dev stack at docker_inner/ — required when running tests
-# under .worktrees/<name>/. See docker_inner/AGENTS.md.
+# per-worktree dev stack at dev-container-inner/ — required when running tests
+# under .worktrees/<name>/. See dev-container-inner/AGENTS.md.
 # Install Docker
 RUN curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
 RUN sudo usermod -aG docker ubuntu

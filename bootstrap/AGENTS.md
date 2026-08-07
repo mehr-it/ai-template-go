@@ -201,7 +201,7 @@ find "${TARGET_DIR}" \
 post-rewrite:
 
 ```bash
-grep -q "${PROJECT_PREFIX}_STACK_SLUG" docker_inner/lib/slug.sh \
+grep -q "${PROJECT_PREFIX}_STACK_SLUG" dev-container-inner/lib/slug.sh \
   || echo "WARNING: slug.sh may not have been rewritten correctly"
 ```
 
@@ -222,21 +222,21 @@ For each service name in `SERVICES` (skip this step entirely if `SERVICES` is em
 **(a) Copy service compose file and rewrite it:**
 
 ```bash
-cp "bootstrap/services/${svc}.yml" "docker_inner/${svc}.yml"
+cp "bootstrap/services/${svc}.yml" "dev-container-inner/${svc}.yml"
 sed -i \
   "s|__PROJECT_MODULE__|${PROJECT_MODULE}|g; \
    s|__PROJECT_PREFIX__|${PROJECT_PREFIX}|g; \
    s|__project_prefix__|${project_prefix}|g; \
    s|__PROJECT_SLUG__|${BINARY}|g; \
    s|__PROJECT_NAME__|${PROJECT_NAME}|g" \
-  "docker_inner/${svc}.yml"
+  "dev-container-inner/${svc}.yml"
 ```
 
-**(b) Add compose include** — change `include: []` in `docker_inner/docker-compose.yml`
+**(b) Add compose include** — change `include: []` in `dev-container-inner/docker-compose.yml`
 to include the new file. The marker comment is `# BOOTSTRAP_SERVICE_INCLUDES`:
 
 ```bash
-sed -i "s|include: \[\]|include:\n  - ${svc}.yml|" docker_inner/docker-compose.yml
+sed -i "s|include: \[\]|include:\n  - ${svc}.yml|" dev-container-inner/docker-compose.yml
 ```
 
 For multiple services, append additional `  - <svc>.yml` lines rather than replacing the
@@ -244,49 +244,49 @@ block again.
 
 **(c) Splice port-discovery** — insert the content of
 `bootstrap/services/${svc}.up-snippet.sh` immediately after the
-`# BOOTSTRAP_SERVICE_PORTS` marker in `docker_inner/up.sh`:
+`# BOOTSTRAP_SERVICE_PORTS` marker in `dev-container-inner/up.sh`:
 
 ```bash
-sed -i "/# BOOTSTRAP_SERVICE_PORTS/r bootstrap/services/${svc}.up-snippet.sh" docker_inner/up.sh
+sed -i "/# BOOTSTRAP_SERVICE_PORTS/r bootstrap/services/${svc}.up-snippet.sh" dev-container-inner/up.sh
 ```
 
 **(d) Splice env line** — append the content of `bootstrap/services/${svc}.env.snippet`
-after the `# BOOTSTRAP_ENV_LINES` marker in `docker_inner/.env.testing.template`:
+after the `# BOOTSTRAP_ENV_LINES` marker in `dev-container-inner/.env.testing.template`:
 
 ```bash
-sed -i "/# BOOTSTRAP_ENV_LINES/r bootstrap/services/${svc}.env.snippet" docker_inner/.env.testing.template
+sed -i "/# BOOTSTRAP_ENV_LINES/r bootstrap/services/${svc}.env.snippet" dev-container-inner/.env.testing.template
 ```
 
 **(e) Auto-generate summary line** — insert a summary echo after the
-`# BOOTSTRAP_SUMMARY_LINES` marker in `docker_inner/up.sh`. Use the uppercase service
+`# BOOTSTRAP_SUMMARY_LINES` marker in `dev-container-inner/up.sh`. Use the uppercase service
 name for the port variable:
 
 ```bash
 SVC_UPPER="$(echo "${svc}" | tr '[:lower:]' '[:upper:]')"
-sed -i "/# BOOTSTRAP_SUMMARY_LINES/a\\  echo \"[docker_inner] ${svc}  127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
-  docker_inner/up.sh
+sed -i "/# BOOTSTRAP_SUMMARY_LINES/a\\  echo \"[dev-container-inner] ${svc}  127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
+  dev-container-inner/up.sh
 ```
 
 **(f) Auto-generate status row** — insert a port lookup and printf pair after the
-`# BOOTSTRAP_STATUS_ROWS` marker in `docker_inner/status.sh`:
+`# BOOTSTRAP_STATUS_ROWS` marker in `dev-container-inner/status.sh`:
 
 ```bash
 SVC_UPPER="$(echo "${svc}" | tr '[:lower:]' '[:upper:]')"
 sed -i "/# BOOTSTRAP_STATUS_ROWS/a\\
-${SVC_UPPER}_PORT=\"\$(docker compose -p \"__project_prefix__-\${__PROJECT_PREFIX___STACK_SLUG}\" -f docker_inner/docker-compose.yml port ${svc} 5432 2>/dev/null | cut -d: -f2)\"\\
+${SVC_UPPER}_PORT=\"\$(docker compose -p \"__project_prefix__-\${__PROJECT_PREFIX___STACK_SLUG}\" -f dev-container-inner/docker-compose.yml port ${svc} 5432 2>/dev/null | cut -d: -f2)\"\\
 printf \"%-20s %s\\\\n\" \"${svc}\" \"127.0.0.1:\${${SVC_UPPER}_PORT}\"" \
-  docker_inner/status.sh
+  dev-container-inner/status.sh
 ```
 
 **Marker summary** (three distinct names across three files):
 
 | Marker | File | Purpose |
 |---|---|---|
-| `BOOTSTRAP_SERVICE_INCLUDES` | `docker_inner/docker-compose.yml` | compose include list |
-| `BOOTSTRAP_SERVICE_PORTS` | `docker_inner/up.sh` | port-discovery stanzas |
-| `BOOTSTRAP_SUMMARY_LINES` | `docker_inner/up.sh` | human-readable summary echoes |
-| `BOOTSTRAP_ENV_LINES` | `docker_inner/.env.testing.template` | env var placeholders |
-| `BOOTSTRAP_STATUS_ROWS` | `docker_inner/status.sh` | port table rows |
+| `BOOTSTRAP_SERVICE_INCLUDES` | `dev-container-inner/docker-compose.yml` | compose include list |
+| `BOOTSTRAP_SERVICE_PORTS` | `dev-container-inner/up.sh` | port-discovery stanzas |
+| `BOOTSTRAP_SUMMARY_LINES` | `dev-container-inner/up.sh` | human-readable summary echoes |
+| `BOOTSTRAP_ENV_LINES` | `dev-container-inner/.env.testing.template` | env var placeholders |
+| `BOOTSTRAP_STATUS_ROWS` | `dev-container-inner/status.sh` | port table rows |
 
 ---
 
@@ -395,9 +395,9 @@ Run these checks. None require Docker to be running — `compose config` is a pu
 **Outer compose config:**
 
 ```bash
-docker compose -f docker/docker-compose.yml config >/dev/null \
-  && echo "OK: docker/docker-compose.yml" \
-  || echo "FAIL: docker/docker-compose.yml"
+docker compose -f dev-container/docker-compose.yml config >/dev/null \
+  && echo "OK: dev-container/docker-compose.yml" \
+  || echo "FAIL: dev-container/docker-compose.yml"
 ```
 
 **Inner compose config** (requires `PROJECT_PREFIX` exported so the variable reference
@@ -405,9 +405,9 @@ resolves):
 
 ```bash
 export "${PROJECT_PREFIX}_STACK_SLUG=validation-slug"
-docker compose -f docker_inner/docker-compose.yml config >/dev/null \
-  && echo "OK: docker_inner/docker-compose.yml" \
-  || echo "FAIL: docker_inner/docker-compose.yml"
+docker compose -f dev-container-inner/docker-compose.yml config >/dev/null \
+  && echo "OK: dev-container-inner/docker-compose.yml" \
+  || echo "FAIL: dev-container-inner/docker-compose.yml"
 ```
 
 **Bash syntax sweep:**
@@ -457,7 +457,7 @@ Print a completion block:
   Template SHA: <BOOTSTRAP_TEMPLATE_SHA>
 
 Next steps:
-  cd <TARGET_DIR>/docker
+  cd <TARGET_DIR>/dev-container
   docker compose up -d
   docker exec -it <project_prefix>-dev bash
   # Inside the container:

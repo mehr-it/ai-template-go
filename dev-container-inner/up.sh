@@ -12,10 +12,10 @@ __project_prefix___derive_slug >/dev/null
 
 cd "${__PROJECT_PREFIX___WORKTREE_ROOT}"
 
-echo "[docker_inner] slug=${__PROJECT_PREFIX___STACK_SLUG} worktree=${__PROJECT_PREFIX___WORKTREE_ROOT}"
+echo "[dev-container-inner] slug=${__PROJECT_PREFIX___STACK_SLUG} worktree=${__PROJECT_PREFIX___WORKTREE_ROOT}"
 
 # Acquire flock to serialize port-discovery against concurrent up.sh invocations
-LOCK_DIR="${__PROJECT_PREFIX___WORKTREE_ROOT}/docker_inner/lock"
+LOCK_DIR="${__PROJECT_PREFIX___WORKTREE_ROOT}/dev-container-inner/lock"
 mkdir -p "${LOCK_DIR}"
 LOCK_FILE="${LOCK_DIR}/up.lock"
 
@@ -26,7 +26,7 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
   # Timeout accommodates slow-starting services (JVM cold starts, DB init, etc.).
   docker compose \
     -p "__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}" \
-    -f "${__PROJECT_PREFIX___WORKTREE_ROOT}/docker_inner/docker-compose.yml" \
+    -f "${__PROJECT_PREFIX___WORKTREE_ROOT}/dev-container-inner/docker-compose.yml" \
     up -d --wait --wait-timeout 180
 
   # Discover dynamic ports (poll until non-empty, max 20 attempts × 5s)
@@ -35,7 +35,7 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
     for _ in $(seq 1 20); do
       result="$(docker compose \
         -p "__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}" \
-        -f "${__PROJECT_PREFIX___WORKTREE_ROOT}/docker_inner/docker-compose.yml" \
+        -f "${__PROJECT_PREFIX___WORKTREE_ROOT}/dev-container-inner/docker-compose.yml" \
         port "${svc}" "${port}" 2>/dev/null | cut -d: -f2)"
       if [[ -n "${result}" ]]; then
         printf '%s' "${result}"
@@ -50,7 +50,7 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
   # BOOTSTRAP_SERVICE_PORTS — port-discovery + sed stanzas appended by bootstrap when services are selected
 
   ENV_FILE="${__PROJECT_PREFIX___WORKTREE_ROOT}/.env.testing"
-  TEMPLATE="${__PROJECT_PREFIX___WORKTREE_ROOT}/docker_inner/.env.testing.template"
+  TEMPLATE="${__PROJECT_PREFIX___WORKTREE_ROOT}/dev-container-inner/.env.testing.template"
   TMPFILE="${__PROJECT_PREFIX___WORKTREE_ROOT}/.env.testing.tmp"
 
   # Generate env file from template (atomic: write to .tmp, then mv).
@@ -67,11 +67,11 @@ LOCK_FILE="${LOCK_DIR}/up.lock"
 
   # Atomic publish
   mv "${TMPFILE}" "${ENV_FILE}"
-  echo "[docker_inner] wrote ${ENV_FILE}"
+  echo "[dev-container-inner] wrote ${ENV_FILE}"
 
-  echo "[docker_inner] stack '__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}' is up."
+  echo "[dev-container-inner] stack '__project_prefix__-${__PROJECT_PREFIX___STACK_SLUG}' is up."
   # BOOTSTRAP_SUMMARY_LINES — service summary lines appended by bootstrap
-  echo "[docker_inner] env file: ${ENV_FILE}  (NEVER COMMIT — generated artifact)"
-  echo "[docker_inner] run tests with: TEST_ENV_FILE=${ENV_FILE} go test ..."
+  echo "[dev-container-inner] env file: ${ENV_FILE}  (NEVER COMMIT — generated artifact)"
+  echo "[dev-container-inner] run tests with: TEST_ENV_FILE=${ENV_FILE} go test ..."
 
 ) 200>"${LOCK_FILE}"

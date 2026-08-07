@@ -22,7 +22,7 @@ mapfile -t PROJECTS < <(docker compose ls --format json 2>/dev/null | \
     jq -r '.[] | select(.Name | startswith("__project_prefix__-")) | .Name' 2>/dev/null || true)
 
 if [[ ${#PROJECTS[@]} -eq 0 ]]; then
-    echo "[docker_inner] no orphan __project_prefix__-* stacks found."
+    echo "[dev-container-inner] no orphan __project_prefix__-* stacks found."
     exit 0
 fi
 
@@ -34,13 +34,13 @@ for project in "${PROJECTS[@]}"; do
     WORKING_DIR=""
     if [[ -n "${CONTAINER}" ]]; then
         LABEL_DIR="$(docker inspect "${CONTAINER}" --format '{{ index .Config.Labels "com.docker.compose.project.working_dir" }}' 2>/dev/null || true)"
-        # Label is set to the directory containing docker-compose.yml (docker_inner), so dirname once to get worktree root
+        # Label is set to the directory containing docker-compose.yml (dev-container-inner), so dirname once to get worktree root
         if [[ -n "${LABEL_DIR}" ]]; then
             WORKING_DIR="$(dirname "${LABEL_DIR}")"
         fi
     fi
 
-    # Fallback: derive from ConfigFiles path (dirname twice: strip /docker-compose.yml then /docker_inner)
+    # Fallback: derive from ConfigFiles path (dirname twice: strip /docker-compose.yml then /dev-container-inner)
     if [[ -z "${WORKING_DIR}" ]]; then
         CONFIG_FILE="$(docker compose ls --format json | \
             jq -r --arg name "${project}" '.[] | select(.Name == $name) | .ConfigFiles' | \
@@ -70,11 +70,11 @@ for project in "${PROJECTS[@]}"; do
 done
 
 if [[ ${#ORPHANS[@]} -eq 0 ]]; then
-    echo "[docker_inner] no orphan __project_prefix__-* stacks found."
+    echo "[dev-container-inner] no orphan __project_prefix__-* stacks found."
     exit 0
 fi
 
-echo "[docker_inner] orphan stacks found:"
+echo "[dev-container-inner] orphan stacks found:"
 for entry in "${ORPHANS[@]}"; do
     name="${entry%%:*}"
     dir="${entry#*:}"
@@ -83,20 +83,20 @@ done
 
 # Prompt or auto-reap
 if [[ "${YES}" == "false" ]] && [[ -t 0 ]]; then
-    read -r -p "[docker_inner] Reap ${#ORPHANS[@]} orphan(s)? [y/N] " REPLY
+    read -r -p "[dev-container-inner] Reap ${#ORPHANS[@]} orphan(s)? [y/N] " REPLY
     if [[ "${REPLY}" != "y" ]] && [[ "${REPLY}" != "Y" ]]; then
-        echo "[docker_inner] aborted."
+        echo "[dev-container-inner] aborted."
         exit 0
     fi
 elif [[ "${YES}" == "false" ]]; then
-    echo "[docker_inner] non-interactive mode: pass --yes to reap orphans."
+    echo "[dev-container-inner] non-interactive mode: pass --yes to reap orphans."
     exit 0
 fi
 
 for entry in "${ORPHANS[@]}"; do
     name="${entry%%:*}"
-    echo "[docker_inner] reaping ${name}..."
+    echo "[dev-container-inner] reaping ${name}..."
     docker compose -p "${name}" down -v --remove-orphans
 done
 
-echo "[docker_inner] reaping complete."
+echo "[dev-container-inner] reaping complete."

@@ -16,7 +16,7 @@ __project_prefix___resolve_worktree_root() {
 # Must be called after __project_prefix___resolve_worktree_root.
 __project_prefix___assert_not_main_checkout() {
     if [[ "${__PROJECT_PREFIX___WORKTREE_ROOT}" == "${__PROJECT_PREFIX___MAIN_CHECKOUT}" ]]; then
-        echo "docker_inner is for worktrees only; the main checkout has no inner stack" >&2
+        echo "dev-container-inner is for worktrees only; the main checkout has no inner stack" >&2
         exit 64
     fi
 }
@@ -37,7 +37,7 @@ __project_prefix___derive_slug() {
     sanitized="$(printf '%s' "${raw_slug}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')"
 
     if [[ -z "${sanitized}" ]]; then
-        echo "docker_inner: slug is empty after sanitization (raw='${raw_slug}')" >&2
+        echo "dev-container-inner: slug is empty after sanitization (raw='${raw_slug}')" >&2
         exit 65
     fi
 

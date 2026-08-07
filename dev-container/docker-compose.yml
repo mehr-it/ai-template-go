@@ -1,7 +1,7 @@
 services:
   workspace:
     build: .
-    container_name: ${PROJECT_NAME:-ai-template}-dev
+    container_name: ${PROJECT_NAME:-ai-template-go}-dev
     runtime: sysbox-runc
     user: "${UID:-1000}:${GID:-1000}"
     env_file:

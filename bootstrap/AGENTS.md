@@ -213,6 +213,43 @@ if [[ "${GO_SKELETON}" == "yes" && -d "bootstrap/go-skeleton/cmd/__PROJECT_SLUG_
 fi
 ```
 
+**Initialize `dev-container/.env`** — the sed sweep above rewrote
+`dev-container/.env.example`'s `__project_prefix__` placeholder to the resolved
+slug. Materialize it as the actual env file that `docker compose` reads:
+
+```bash
+cp dev-container/.env.example dev-container/.env
+```
+
+Rationale: `dev-container/docker-compose.yml` declares
+`container_name: ${PROJECT_NAME:-ai-template-go}-dev`. Without a
+`dev-container/.env`, every bootstrapped project falls back to the literal
+default `ai-template-go-dev`, so two clones of the template collide globally
+on the Docker daemon with `Error response from daemon: Conflict. The
+container name "/ai-template-go-dev" is already in use`. Writing the
+project-specific slug into `.env` eliminates the collision by default.
+
+`dev-container/.env` is already listed in the root `.gitignore`, so this file
+is created locally and never committed. Verify the resolved value (this check
+reads `.env` directly and does not require Docker to be installed):
+
+```bash
+if [[ ! -f dev-container/.env ]]; then
+  echo "FAIL: dev-container/.env was not created"
+elif grep -q '^PROJECT_NAME=__project_prefix__$' dev-container/.env; then
+  echo "FAIL: dev-container/.env still contains __project_prefix__ placeholder"
+elif grep -q "^PROJECT_NAME=${project_prefix}\$" dev-container/.env; then
+  echo "OK: dev-container/.env → PROJECT_NAME=${project_prefix} (container_name will be ${project_prefix}-dev)"
+else
+  echo "FAIL: dev-container/.env PROJECT_NAME does not equal '${project_prefix}':"
+  grep '^PROJECT_NAME=' dev-container/.env || echo "  (no PROJECT_NAME line found)"
+fi
+```
+
+If the check reports FAIL, either `.env.example` still contains the
+`__project_prefix__` placeholder (step 8's sed sweep did not process it — verify
+the `find` filters) or the `cp` above did not run.
+
 ---
 
 ### 9. Wire selected services
@@ -381,7 +418,7 @@ If `COMMIT=yes` (regardless of whether git was reset):
 
 ```bash
 git add .
-git commit -m "Bootstrap from mehr-it/ai-template@${BOOTSTRAP_TEMPLATE_SHA}"
+git commit -m "Bootstrap from mehr-it/ai-template-go@${BOOTSTRAP_TEMPLATE_SHA}"
 ```
 
 The `BOOTSTRAP_TEMPLATE_SHA` captured in step 0 records which template version was used.
@@ -398,6 +435,24 @@ Run these checks. None require Docker to be running — `compose config` is a pu
 docker compose -f dev-container/docker-compose.yml config >/dev/null \
   && echo "OK: dev-container/docker-compose.yml" \
   || echo "FAIL: dev-container/docker-compose.yml"
+```
+
+**Outer container `.env` sanity** — verifies step 8's `.env` init ran. Without
+this file, `container_name` silently falls back to `ai-template-go-dev` and
+collides with other clones on the same Docker daemon. This check reads `.env`
+directly and does not require Docker to be installed:
+
+```bash
+if [[ ! -f dev-container/.env ]]; then
+  echo "FAIL: dev-container/.env missing — re-run step 8 'Initialize dev-container/.env'"
+elif grep -q '^PROJECT_NAME=__project_prefix__$' dev-container/.env; then
+  echo "FAIL: dev-container/.env still contains __project_prefix__ placeholder — step 8 sed did not process .env.example"
+elif grep -q "^PROJECT_NAME=${project_prefix}\$" dev-container/.env; then
+  echo "OK: dev-container/.env → PROJECT_NAME=${project_prefix}"
+else
+  echo "FAIL: dev-container/.env PROJECT_NAME does not equal '${project_prefix}':"
+  grep '^PROJECT_NAME=' dev-container/.env || echo "  (no PROJECT_NAME line found)"
+fi
 ```
 
 **Inner compose config** (requires `PROJECT_PREFIX` exported so the variable reference

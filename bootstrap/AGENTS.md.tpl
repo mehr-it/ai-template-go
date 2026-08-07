@@ -49,4 +49,4 @@ make dev-down
 
 ## Bootstrap history
 
-Bootstrapped from `mehr-it/ai-template`. Template updates are cherry-picked manually. No re-bootstrap.
+Bootstrapped from `mehr-it/ai-template-go`. Template updates are cherry-picked manually. No re-bootstrap.

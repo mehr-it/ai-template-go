@@ -1,4 +1,4 @@
-# ai-template
+# ai-template-go
 
 A template for AI-driven Go projects. It pairs a [sysbox](https://github.com/nestybox/sysbox)-backed outer Docker container (your persistent dev environment) with a per-worktree inner stack that the AI agent spins up on demand. Clone it, run bootstrap, hand the resulting repo to your agent, and you have a fully wired Go project with Docker-in-Docker, a structured agent knowledge base, and a reproducible dev loop.
 
@@ -19,10 +19,10 @@ A template for AI-driven Go projects. It pairs a [sysbox](https://github.com/nes
 Tell your AI agent:
 
 ```
-Use `github.com/mehr-it/ai-template` to start a new Go AI project called `<name>` into `./<name>/`.
+Use `github.com/mehr-it/ai-template-go` to start a new Go AI project called `<name>` into `./<name>/`.
 ```
 
-Substitute your fork URL for `github.com/mehr-it/ai-template` and your actual project name for `<name>`. The agent reads `bootstrap/AGENTS.md`, runs the 16-step interview, rewrites all placeholder values, and leaves you with a ready-to-run repo.
+Substitute your fork URL for `github.com/mehr-it/ai-template-go` and your actual project name for `<name>`. The agent reads `bootstrap/AGENTS.md`, runs the 16-step interview, rewrites all placeholder values, and leaves you with a ready-to-run repo.
 
 ## After bootstrap
 

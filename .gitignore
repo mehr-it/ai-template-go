@@ -27,3 +27,6 @@ opencode.jsonc
 # *.test
 # *.out
 # coverage.*
+
+.idea
+.omo
